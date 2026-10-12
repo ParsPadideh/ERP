@@ -1,0 +1,765 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="AdminMaster.master.cs" Inherits="admin_AdminMaster" %>
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <asp:ContentPlaceHolder ID="PageTitle" runat="server" />
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'Tahoma', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
+                            300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
+                            600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
+                        },
+                        ink: {
+                            100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+                            400: '#94a3b8', 500: '#64748b', 600: '#475569',
+                            700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        },
+                        surface: {
+                            card: '#ffffff',
+                            body: '#f8fafc',
+                            muted: '#f1f5f9',
+                            line: '#eef2f6'
+                        },
+                        success: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857' },
+                        warning: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309' },
+                        danger:  { 50: '#fef2f2', 100: '#fee2e2', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c' }
+                    },
+                    borderRadius: { 'card': '16px', 'base': '10px' },
+                    boxShadow: {
+                        'card': '0 4px 24px -6px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04)',
+                        'card-lg': '0 20px 40px -16px rgba(15, 23, 42, 0.18), 0 4px 12px -4px rgba(15, 23, 42, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <style>
+        html, body { font-family: 'Vazirmatn', Tahoma, sans-serif; background: #f8fafc; }
+
+        .dashboard-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .dashboard-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .dashboard-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dashboard-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        .admin-sidebar {
+            background: linear-gradient(180deg, #0b1220 0%, #0f172a 50%, #0b1220 100%);
+            box-shadow: -8px 0 40px -12px rgba(15, 23, 42, 0.3);
+        }
+        .admin-sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.65);
+            transition: all .2s cubic-bezier(.4, 0, .2, 1);
+            text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.95); }
+        .nav-item:hover .nav-icon { color: #60a5fa; }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.25) 0%, rgba(37, 99, 235, 0.05) 100%);
+            color: #ffffff;
+            box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.2);
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 22px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #60a5fa, #2563eb);
+            box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+        }
+        .nav-item.active .nav-icon { color: #60a5fa; }
+        .nav-icon {
+            display: grid;
+            place-items: center;
+            width: 20px;
+            height: 20px;
+            color: rgba(255,255,255,0.5);
+            transition: color .2s;
+            flex-shrink: 0;
+        }
+
+        .nav-section-label {
+            padding: 0 14px;
+            margin: 18px 0 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.32);
+        }
+
+        .nav-badge {
+            margin-right: auto;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            background: rgba(239, 68, 68, 0.9);
+            color: #fff;
+            box-shadow: 0 2px 8px -2px rgba(239, 68, 68, 0.5);
+        }
+        .nav-badge--warn { background: rgba(245, 158, 11, 0.95); box-shadow: 0 2px 8px -2px rgba(245, 158, 11, 0.5); }
+        .nav-badge--info { background: rgba(59, 130, 246, 0.95); box-shadow: 0 2px 8px -2px rgba(59, 130, 246, 0.5); }
+        .nav-badge--success { background: rgba(16, 185, 129, 0.95); box-shadow: 0 2px 8px -2px rgba(16, 185, 129, 0.5); }
+
+        .admin-topbar {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 260px;
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.25), 0 8px 20px -10px rgba(15, 23, 42, 0.1);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: all .2s cubic-bezier(.4, 0, .2, 1);
+            overflow: hidden;
+        }
+        .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: all .3s ease;
+        }
+        .sidebar-overlay.show { opacity: 1; visibility: visible; }
+
+        @media (max-width: 1024px) {
+            .admin-sidebar { transform: translateX(100%); transition: transform .3s cubic-bezier(.4, 0, .2, 1); }
+            .admin-sidebar.open { transform: translateX(0); }
+        }
+
+        .icon-button {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            color: #64748b;
+            transition: all .2s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+        .icon-button:hover { background: #f1f5f9; color: #0f172a; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 7px;
+            font-size: 11.5px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            border: 2px solid #fff;
+        }
+        .notif-dot::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            background: inherit;
+            animation: notifPulse 1.8s ease-out infinite;
+        }
+        @keyframes notifPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+
+        .bc-sep { color: #cbd5e1; margin: 0 6px; font-weight: 500; }
+
+        .admin-content { animation: contentIn .35s cubic-bezier(.4, 0, .2, 1); }
+        @keyframes contentIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-group { overflow: hidden; }
+        .nav-group-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 9px 14px; border-radius: 10px;
+            font-size: 13.5px; font-weight: 600;
+            color: rgba(255,255,255,0.65);
+            cursor: pointer; transition: all .2s;
+            user-select: none;
+        }
+        .nav-group-header:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.95); }
+        .nav-group-header .nav-icon { transition: transform .2s; }
+        .nav-group-header.open .nav-icon { color: #60a5fa; }
+        .nav-group-header .chev { margin-right: auto; transition: transform .25s; color: rgba(255,255,255,0.35); }
+        .nav-group-header.open .chev { transform: rotate(-90deg); }
+        .nav-group-body { max-height: 0; overflow: hidden; transition: max-height .3s ease; padding-right: 12px; }
+        .nav-group-body.open { max-height: 800px; }
+        .nav-group-body .nav-item { padding-right: 30px; font-size: 12.5px; }
+    </style>
+
+    <!-- Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* RTL Select2 */
+    .select2-container--default .select2-selection--single {
+        height: 42px !important;
+        border: 1px solid #eef2f6 !important;
+        border-radius: 10px !important;
+        background: #fff !important;
+        padding: 6px 10px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px !important;
+        font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+        font-size: 13.5px !important;
+        color: #334155 !important;
+        padding-right: 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        left: 8px !important;
+        right: auto !important;
+        height: 40px !important;
+    }
+    .select2-dropdown {
+        border: 1px solid #eef2f6 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.15) !important;
+        font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        border: 1px solid #eef2f6 !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+        font-size: 13px !important;
+        direction: rtl !important;
+    }
+    .select2-results__option {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        direction: rtl !important;
+    }
+    .select2-results__option--highlighted[aria-selected] {
+        background-color: #2563eb !important;
+    }
+    .select2-search--dropdown {
+        padding: 8px !important;
+    }
+    /* مخفی‌کردن Select2 در چاپ */
+    @media print {
+        .select2-container { display: none !important; }
+    }
+</style>
+
+<!-- Select2 JS (در انتهای head) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+
+    <asp:ContentPlaceHolder ID="head" runat="server" />
+</head>
+<body class="min-h-screen bg-surface-body antialiased">
+<form id="mainForm" runat="server">
+
+    <div id="sidebarOverlay" class="sidebar-overlay lg:hidden"></div>
+
+    <aside id="sidebar" class="admin-sidebar fixed right-0 top-0 z-50 flex h-screen w-[272px] flex-col overflow-hidden">
+
+        <!-- Brand -->
+        <div class="relative flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
+            <span class="relative grid h-11 w-11 place-items-center rounded-xl"
+                style="background: linear-gradient(135deg, #2563eb, #1e40af); box-shadow: 0 8px 20px -8px rgba(37,99,235,0.6);">
+                <i class="h-5 w-5 text-white" data-lucide="factory"></i>
+                <span class="absolute -bottom-0.5 -left-0.5 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-400"></span>
+            </span>
+            <div class="min-w-0 flex-1">
+                <p class="truncate text-[14.5px] font-extrabold text-white">سامانه ERP کارخانه</p>
+                <p class="mt-0.5 truncate text-[10.5px] font-medium text-white/45">Food Factory ERP</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-3">
+
+            <!-- اصلی -->
+            <div class="nav-section-label">اصلی</div>
+            <a href="Default.aspx" class='nav-item <%= IsActive("Default.aspx") ? "active" : "" %>'>
+                <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layout-dashboard"></i></span>
+                <span>داشبورد</span>
+            </a>
+            <a href="reports-hub.aspx" class='nav-item <%= IsActive("reports-hub.aspx") ? "active" : "" %>'>
+    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layout-grid"></i></span>
+    <span>مرکز گزارش‌ها</span>
+</a>
+
+            <!-- داده‌های پایه -->
+            <asp:Panel ID="pnlSectionBase" runat="server">
+                <div class="nav-section-label">داده‌های پایه</div>
+                <a href="products.aspx" class='nav-item <%= IsActive("products.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="package"></i></span>
+                    <span>محصولات</span>
+                    <asp:Literal ID="litLowStockBadge" runat="server" />
+                </a>
+                <a href="product-categories.aspx" class='nav-item <%= IsActive("product-categories.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="folder-tree"></i></span>
+                    <span>دسته‌بندی محصولات</span>
+                </a>
+                <a href="units.aspx" class='nav-item <%= IsActive("units.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="ruler"></i></span>
+                    <span>واحدهای اندازه‌گیری</span>
+                </a>
+                <a href="warehouses.aspx" class='nav-item <%= IsActive("warehouses.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="warehouse"></i></span>
+                    <span>انبارها</span>
+                </a>
+            </asp:Panel>
+
+            <!-- طرف‌های تجاری -->
+            <asp:Panel ID="pnlSectionParties" runat="server">
+                <div class="nav-section-label">طرف‌های تجاری</div>
+                <a href="customers.aspx" class='nav-item <%= IsActive("customers.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="users"></i></span>
+                    <span>مشتریان</span>
+                </a>
+                <a href="suppliers.aspx" class='nav-item <%= IsActive("suppliers.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="truck"></i></span>
+                    <span>تأمین‌کنندگان</span>
+                </a>
+                <a href="price-lists.aspx" class='nav-item <%= IsActive("price-lists.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="tags"></i></span>
+                    <span>لیست‌های قیمت</span>
+                </a>
+            </asp:Panel>
+
+            <!-- انبار -->
+            <asp:Panel ID="pnlSectionStock" runat="server">
+                <div class="nav-section-label">انبار</div>
+                <a href="stock-onhand.aspx" class='nav-item <%= IsActive("stock-onhand.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="boxes"></i></span>
+                    <span>موجودی لحظه‌ای</span>
+                </a>
+                <a href="stock-movements.aspx" class='nav-item <%= IsActive("stock-movements.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="arrow-left-right"></i></span>
+                    <span>گردش انبار</span>
+                </a>
+            </asp:Panel>
+
+            <!-- خرید -->
+            <asp:Panel ID="pnlSectionPurchase" runat="server">
+                <div class="nav-section-label">خرید</div>
+                <a href="purchase-orders.aspx" class='nav-item <%= IsActive("purchase-orders.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="shopping-cart"></i></span>
+                    <span>سفارش‌های خرید</span>
+                </a>
+            </asp:Panel>
+
+            <!-- تولید -->
+            <asp:Panel ID="pnlSectionProduction" runat="server">
+                <div class="nav-section-label">تولید</div>
+                <a href="boms.aspx" class='nav-item <%= IsActive("boms.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="git-branch"></i></span>
+                    <span>فرمول ساخت (BOM)</span>
+                </a>
+                <a href="production-orders.aspx" class='nav-item <%= IsActive("production-orders.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="hammer"></i></span>
+                    <span>دستورهای تولید</span>
+                    <asp:Literal ID="litProdBadge" runat="server" />
+                </a>
+            </asp:Panel>
+
+            <!-- خدمات (جدید) -->
+            <asp:Panel ID="pnlSectionServices" runat="server">
+                <div class="nav-section-label">خدمات</div>
+                <a href="service-orders.aspx" class='nav-item <%= IsActive("service-orders.aspx") %> <%= IsActive("service-receipt.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="wrench"></i></span>
+                    <span>سفارش‌های خدمات</span>
+                    <asp:Literal ID="litServiceBadge" runat="server" />
+                </a>
+                <a href="service-types.aspx" class='nav-item <%= IsActive("service-types.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="settings"></i></span>
+                    <span>کاتالوگ خدمات</span>
+                </a>
+            </asp:Panel>
+
+            <!-- فروش -->
+            <asp:Panel ID="pnlSectionSales" runat="server">
+                <div class="nav-section-label">فروش</div>
+                <a href="sales-orders.aspx" class='nav-item <%= IsActive("sales-orders.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="clipboard-list"></i></span>
+                    <span>سفارش‌های فروش</span>
+                </a>
+                <a href="proforma-invoices.aspx" class='nav-item <%= IsActive("proforma-invoices.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="file-text"></i></span>
+                    <span>پیش‌فاکتورها</span>
+                    <asp:Literal ID="litProformaBadge" runat="server" />
+                </a>
+                <a href="final-invoices.aspx" class='nav-item <%= IsActive("final-invoices.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="receipt"></i></span>
+                    <span>فاکتورهای نهایی</span>
+                </a>
+            </asp:Panel>
+
+            <!-- مالی -->
+            <asp:Panel ID="pnlSectionFinance" runat="server">
+                <div class="nav-section-label">مالی</div>
+                <a href="expense-categories.aspx" class='nav-item <%= IsActive("expense-categories.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layers"></i></span>
+                    <span>دسته‌بندی هزینه‌ها</span>
+                </a>
+                <a href="expenses.aspx" class='nav-item <%= IsActive("expenses.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="wallet"></i></span>
+                    <span>هزینه‌ها</span>
+                </a>
+            </asp:Panel>
+
+            <!-- شرکا و سود -->
+            <asp:Panel ID="pnlSectionPartners" runat="server">
+                <div class="nav-section-label">شرکا و سود</div>
+
+                <a href="partners.aspx" class='nav-item <%= IsActive("partners.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="users-round"></i></span>
+                    <span>شرکا و سهام</span>
+                </a>
+
+                <a href="profit-loss.aspx" class='nav-item <%= IsActive("profit-loss.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="bar-chart-3"></i></span>
+                    <span>گزارش سود و زیان</span>
+                </a>
+
+                <a href="profit-periods.aspx" class='nav-item <%= IsActive("profit-periods.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="calendar-check"></i></span>
+                    <span>دوره‌های تقسیم سود</span>
+                    <asp:Literal ID="litPeriodsBadge" runat="server" />
+                </a>
+
+                <a href="profit-settings.aspx" class='nav-item <%= IsActive("profit-settings.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="settings-2"></i></span>
+                    <span>تنظیمات تقسیم سود</span>
+                </a>
+            </asp:Panel>
+
+            <!-- سیستم -->
+            <asp:Panel ID="pnlSectionSystem" runat="server">
+                <div class="nav-section-label">سیستم</div>
+                <a href="users.aspx" class='nav-item <%= IsActive("users.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="user-cog"></i></span>
+                    <span>کاربران</span>
+                </a>
+                <a href="roles.aspx" class='nav-item <%= IsActive("roles.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="shield"></i></span>
+                    <span>نقش‌ها</span>
+                </a>
+                <a href="audit-logs.aspx" class='nav-item <%= IsActive("audit-logs.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="scroll-text"></i></span>
+                    <span>لاگ فعالیت‌ها</span>
+                </a>
+            </asp:Panel>
+
+            <!-- راهنما -->
+            <div class="nav-section-label">راهنما</div>
+            <a href="javascript:void(0);" onclick="showHelp(); return false;" class="nav-item">
+                <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="help-circle"></i></span>
+                <span>راهنما و پشتیبانی</span>
+            </a>
+
+        </nav>
+
+        <!-- User Card -->
+        <div class="border-t border-white/[0.06] p-3">
+            <div class="relative flex items-center gap-3 rounded-xl bg-white/[0.04] p-3 backdrop-blur">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[14px] font-bold"
+                    style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 4px 12px -4px rgba(37,99,235,0.5);">
+                    <asp:Literal ID="litUserInitial" runat="server" Text="U" />
+                </span>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-[13px] font-bold text-white">
+                        <asp:Literal ID="litUserFullName" runat="server" Text="کاربر" />
+                    </p>
+                    <p class="mt-0.5 truncate text-[10.5px] font-semibold text-brand-300">
+                        <asp:Literal ID="litUserRole" runat="server" Text="—" />
+                    </p>
+                </div>
+                <asp:LinkButton ID="btnLogoutSidebar" runat="server" OnClick="btnLogout_Click"
+                    CssClass="icon-button" ToolTip="خروج" Style="color: rgba(255,255,255,0.5);">
+                    <i class="h-4 w-4" data-lucide="log-out"></i>
+                </asp:LinkButton>
+            </div>
+        </div>
+    </aside>
+
+    <div class="lg:mr-[272px] flex min-h-screen flex-col">
+
+        <!-- Topbar -->
+        <header class="admin-topbar sticky top-0 z-30">
+            <div class="flex h-16 items-center gap-3 px-4 sm:px-6">
+
+                <button type="button" onclick="toggleSidebar(); return false;" class="icon-button lg:hidden">
+                    <i class="h-5 w-5" data-lucide="menu"></i>
+                </button>
+
+                <div class="hidden min-w-0 flex-1 sm:block">
+                    <nav class="flex items-center text-[12.5px] font-semibold text-ink-500">
+                        <a href="Default.aspx" class="inline-flex items-center gap-1 transition hover:text-brand-600">
+                            <i class="h-3.5 w-3.5" data-lucide="home"></i>
+                            خانه
+                        </a>
+                        <asp:Literal ID="litBreadcrumb" runat="server" />
+                    </nav>
+                </div>
+
+                <div class="hidden md:block md:flex-1 md:max-w-md">
+                    <label class="relative block">
+                        <i class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
+                            data-lucide="search"></i>
+                        <input type="text" id="topSearch" placeholder="جستجوی سریع..."
+                            onkeydown="if(event.key==='Enter'){quickSearch(this.value);}"
+                            class="h-10 w-full rounded-xl border border-surface-line bg-surface-body pl-11 pr-4 text-[13px] font-medium placeholder:text-ink-400 focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-100/50 transition" />
+                    </label>
+                </div>
+
+                <div class="flex-1 md:hidden"></div>
+
+                <div class="flex items-center gap-1">
+                    <a href="javascript:void(0);" onclick="location.reload(); return false;"
+                        class="icon-button" title="بروزرسانی">
+                        <i class="h-4 w-4" data-lucide="refresh-cw"></i>
+                    </a>
+
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <button type="button" onclick="toggleDropdown('notifDropdown'); return false;"
+                            class="icon-button relative">
+                            <i class="h-4 w-4" data-lucide="bell"></i>
+                            <asp:Literal ID="litNotifDot" runat="server" />
+                        </button>
+
+                        <div id="notifDropdown" class="dropdown-menu w-[360px]">
+                            <div class="flex items-center justify-between border-b border-surface-line px-4 py-3">
+                                <p class="text-[13px] font-extrabold text-ink-900">اعلان‌ها</p>
+                                <asp:Literal ID="litNotifCount" runat="server" />
+                            </div>
+                            <div class="max-h-[360px] overflow-y-auto dashboard-scrollbar">
+                                <asp:Repeater ID="rptNotifications" runat="server">
+                                    <ItemTemplate>
+                                        <a href='<%# Eval("Link") %>'
+                                            class="flex items-start gap-3 border-b border-surface-line/50 px-4 py-3 transition hover:bg-surface-body">
+                                            <span class='<%# GetNotifIconCss(Eval("Type")) %>'>
+                                                <i class="h-4 w-4" data-lucide='<%# GetNotifIcon(Eval("Type")) %>'></i>
+                                            </span>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-[12.5px] font-bold text-ink-800">
+                                                    <%# HttpUtility.HtmlEncode(Eval("Title")) %>
+                                                </p>
+                                                <p class="mt-0.5 text-[11.5px] text-ink-500">
+                                                    <%# HttpUtility.HtmlEncode(Eval("Description")) %>
+                                                </p>
+                                                <p class="mt-1 text-[10.5px] font-semibold text-ink-400">
+                                                    <%# Eval("TimeText") %>
+                                                </p>
+                                            </div>
+                                        </a>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+                            <div class="border-t border-surface-line bg-surface-body px-4 py-2.5 text-center">
+                                <a href="stock-onhand.aspx" class="text-[12px] font-bold text-brand-600 hover:underline">
+                                    مشاهده موجودی انبار
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User menu -->
+                    <div class="relative">
+                        <button type="button" onclick="toggleDropdown('userDropdown'); return false;"
+                            class="flex items-center gap-2 rounded-xl border border-transparent px-1.5 py-1 transition hover:border-surface-line hover:bg-surface-muted">
+                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold"
+                                style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 4px 12px -4px rgba(37,99,235,0.5);">
+                                <asp:Literal ID="litUserInitialTop" runat="server" Text="U" />
+                            </span>
+                            <span class="hidden text-right lg:block">
+                                <span class="block text-[12.5px] font-bold leading-tight text-ink-800">
+                                    <asp:Literal ID="litUserNameTop" runat="server" Text="کاربر" />
+                                </span>
+                                <span class="mt-0.5 block text-[10.5px] font-semibold leading-tight text-ink-500">
+                                    <asp:Literal ID="litUserRoleTop" runat="server" Text="—" />
+                                </span>
+                            </span>
+                            <i class="hidden h-3.5 w-3.5 text-ink-400 lg:block" data-lucide="chevron-down"></i>
+                        </button>
+
+                        <div id="userDropdown" class="dropdown-menu w-[280px]">
+                            <div class="flex items-center gap-3 border-b border-surface-line bg-gradient-to-l from-brand-50/60 to-transparent px-4 py-3.5">
+                                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-[15px] font-bold"
+                                    style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 6px 14px -6px rgba(37,99,235,0.6);">
+                                    <asp:Literal ID="litUserInitialMenu" runat="server" Text="U" />
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-[13.5px] font-extrabold text-ink-900">
+                                        <asp:Literal ID="litUserFullNameMenu" runat="server" Text="کاربر" />
+                                    </p>
+                                    <p class="mt-0.5 truncate font-mono text-[11px] font-semibold text-ink-500" dir="ltr">
+                                        @<asp:Literal ID="litUsernameMenu" runat="server" Text="user" />
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="p-1.5">
+                                <a href="change-password.aspx" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[12.5px] font-semibold text-ink-700 transition hover:bg-surface-muted">
+                                    <i class="h-4 w-4 text-ink-500" data-lucide="key-round"></i>
+                                    تغییر رمز عبور
+                                </a>
+                                <a href="audit-logs.aspx" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[12.5px] font-semibold text-ink-700 transition hover:bg-surface-muted">
+                                    <i class="h-4 w-4 text-ink-500" data-lucide="history"></i>
+                                    فعالیت‌های من
+                                </a>
+                            </div>
+
+                            <div class="border-t border-surface-line p-1.5">
+                                <asp:LinkButton ID="btnLogout" runat="server" OnClick="btnLogout_Click"
+                                    CssClass="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[12.5px] font-bold text-danger-600 transition hover:bg-danger-50">
+                                    <i class="h-4 w-4" data-lucide="log-out"></i>
+                                    خروج از حساب کاربری
+                                </asp:LinkButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="admin-content flex-1 p-4 sm:p-6">
+            <asp:ContentPlaceHolder ID="mainContent" runat="server" />
+        </main>
+
+        <footer class="border-t border-surface-line bg-white px-6 py-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 text-[11.5px] font-semibold text-ink-500">
+                <p>© <asp:Literal ID="litYear" runat="server" /> — سامانه ERP کارخانه تولید و بسته‌بندی مواد غذایی</p>
+                <p class="flex items-center gap-4">
+                    <span>نسخه ۱.۰.۰ — فاز MVP</span>
+                    <a href="javascript:void(0);" onclick="showHelp(); return false;" class="hover:text-brand-600">پشتیبانی</a>
+                </p>
+            </div>
+        </footer>
+
+    </div>
+</form>
+
+<script type="text/javascript">
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+    document.getElementById('sidebarOverlay').addEventListener('click', function () { toggleSidebar(); });
+
+    var openDropdown = null;
+    function toggleDropdown(id) {
+        var menu = document.getElementById(id);
+        if (!menu) return;
+        if (openDropdown === menu) { menu.classList.remove('show'); openDropdown = null; return; }
+        if (openDropdown) openDropdown.classList.remove('show');
+        menu.classList.add('show');
+        openDropdown = menu;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    document.addEventListener('click', function (e) {
+        if (!openDropdown) return;
+        if (!e.target.closest('.dropdown-menu') && !e.target.closest('[onclick*="toggleDropdown"]')) {
+            openDropdown.classList.remove('show');
+            openDropdown = null;
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && openDropdown) { openDropdown.classList.remove('show'); openDropdown = null; }
+    });
+
+    function quickSearch(term) {
+        if (!term || !term.trim()) return;
+        window.location.href = 'products.aspx?q=' + encodeURIComponent(term.trim());
+    }
+    function showHelp() {
+        alert('راهنمای سامانه ERP:\n\n' +
+              '• داده‌های پایه را ابتدا تعریف کنید (واحد، دسته، محصول)\n' +
+              '• سپس مشتریان و تأمین‌کنندگان را ثبت کنید\n' +
+              '• برای موجودی اولیه، از «تعدیل افزایشی» استفاده کنید\n' +
+              '• خدمات جانبی (بوجاری، خشک‌کن): ابتدا در «کاتالوگ خدمات» تعریف، سپس «سفارش خدمات» ثبت کنید\n' +
+              '• برای تقسیم سود شرکا، از بخش «شرکا و سود» استفاده کنید');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons({ attrs: { 'stroke-width': 2, 'class': 'lucide' } });
+        }
+    });
+</script>
+
+<asp:ContentPlaceHolder ID="scripts" runat="server" />
+</body>
+</html>
