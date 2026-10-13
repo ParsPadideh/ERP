@@ -37,12 +37,58 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
             }
         }
 
+        // ═══════════════════════════════════════════════════════
+        // کنترل دسترسی بازاریاب — فقط کاتالوگ و فاکتورهای خودش
+        // ═══════════════════════════════════════════════════════
+        string currentRole = Session["PrimaryRole"] == null ? "" : Convert.ToString(Session["PrimaryRole"]);
+
+        if (string.Equals(currentRole, "بازاریاب", StringComparison.OrdinalIgnoreCase))
+        {
+            string currentPage = System.IO.Path.GetFileName(Request.AppRelativeCurrentExecutionFilePath).ToLowerInvariant();
+
+            bool isAllowed =
+                currentPage == "sales-presentation.aspx" ||
+                currentPage == "my-invoices.aspx" ||
+                currentPage == "my-invoice-edit.aspx" ||
+                currentPage == "my-invoice-details.aspx" ||
+                currentPage == "change-password.aspx" ||
+                currentPage == "default.aspx" ||
+                currentPage == "login.aspx" ||
+                currentPage == "proforma-print.aspx";
+
+            // اگر در داشبورد بود، به کاتالوگ هدایت کن
+            if (currentPage == "default.aspx")
+            {
+                Response.Redirect(ResolveUrl("~/admin/sales-presentation.aspx"), false);
+                return;
+            }
+
+            // اگر صفحه‌ای خارج از دسترسی بود، به کاتالوگ هدایت کن
+            if (!isAllowed)
+            {
+                Response.Redirect(ResolveUrl("~/admin/sales-presentation.aspx"), false);
+                return;
+            }
+        }
+
         LoadUserInfo();
         ApplyRolePermissions();
         LoadBadges();
 
         litBreadcrumb.Text = BuildBreadcrumb();
-        LoadNotifications();
+
+        // ═══════════════════════════════════════════════════════
+        // نوتیفیکیشن فقط برای ادمین و مدیر بهره‌برداری
+        // ═══════════════════════════════════════════════════════
+        string roleForNotif = Session["PrimaryRole"] == null ? "" : Convert.ToString(Session["PrimaryRole"]);
+        bool isMarketerForNotif = string.Equals(roleForNotif, "بازاریاب", StringComparison.OrdinalIgnoreCase);
+
+        pnlNotifications.Visible = !isMarketerForNotif;
+
+        if (!isMarketerForNotif)
+        {
+            LoadNotifications();
+        }
     }
 
     // ─────────────────────────────────────────────────────
@@ -161,6 +207,9 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
         bool isProducer = string.Equals(role, "مسئول تولید", StringComparison.OrdinalIgnoreCase);
         bool isAccountant = string.Equals(role, "حسابدار", StringComparison.OrdinalIgnoreCase);
 
+        // اصلی
+        pnlSectionMain.Visible = isAdmin || isManager || isOwner || isKeeper || isProducer || isAccountant;
+
         // داده‌های پایه
         pnlSectionBase.Visible = isAdmin || isManager || isKeeper || isProducer;
 
@@ -176,7 +225,7 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
         // تولید
         pnlSectionProduction.Visible = isAdmin || isManager || isProducer;
 
-        // خدمات (جدید) — اپراتورها، انباردار، مسئول تولید و مدیر
+        // خدمات
         pnlSectionServices.Visible = isAdmin || isManager || isKeeper || isProducer || isAccountant;
 
         // فروش
@@ -191,9 +240,16 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
         // سیستم
         pnlSectionSystem.Visible = isAdmin;
 
+        // بخش بازاریاب — فقط برای بازاریاب
+        pnlSectionMarketer.Visible = isMarketer;
+
+        // نوتیفیکیشن — پیش‌فرض روشن، در بازاریاب خاموش می‌شود
+        pnlNotifications.Visible = !isMarketer;
+
         // مالک تجهیزات — فقط شرکا و سود
         if (isOwner)
         {
+            pnlSectionMain.Visible = false;
             pnlSectionBase.Visible = false;
             pnlSectionParties.Visible = false;
             pnlSectionStock.Visible = false;
@@ -203,9 +259,31 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
             pnlSectionSales.Visible = false;
             pnlSectionFinance.Visible = false;
             pnlSectionSystem.Visible = false;
-            // pnlSectionPartners دست‌نخورده — مالک (شریک) باید ببیند
+            // pnlSectionPartners دست‌نخورده
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // بازاریاب — فقط کاتالوگ فروش + گزارش فاکتورهای خودش
+        // ═══════════════════════════════════════════════════════
+        if (isMarketer)
+        {
+            pnlSectionMain.Visible = false;
+            pnlSectionBase.Visible = false;
+            pnlSectionParties.Visible = false;
+            pnlSectionStock.Visible = false;
+            pnlSectionPurchase.Visible = false;
+            pnlSectionProduction.Visible = false;
+            pnlSectionServices.Visible = false;
+            pnlSectionSales.Visible = false;
+            pnlSectionFinance.Visible = false;
+            pnlSectionPartners.Visible = false;
+            pnlSectionSystem.Visible = false;
+
+            pnlSectionMarketer.Visible = true;
+            pnlNotifications.Visible = false;
         }
     }
+
     // ─────────────────────────────────────────────────────
     // Active link
     // ─────────────────────────────────────────────────────
@@ -254,12 +332,14 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
         map["profit-loss.aspx"] = "گزارش سود و زیان";
         map["profit-periods.aspx"] = "دوره‌های تقسیم سود";
         map["profit-settings.aspx"] = "تنظیمات تقسیم سود";
-        // ═══ صفحات جدید (خدمات) ═══
         map["service-types.aspx"] = "کاتالوگ خدمات";
         map["service-orders.aspx"] = "سفارش‌های خدمات";
         map["service-receipt.aspx"] = "رسید خدمات";
-
         map["reports-hub.aspx"] = "مرکز گزارش‌ها";
+        map["sales-presentation.aspx"] = "کاتالوگ فروش";
+        map["my-invoices.aspx"] = "فاکتورهای من";
+        map["my-invoice-edit.aspx"] = "ویرایش پیش‌نویس";
+
         string title;
         if (map.TryGetValue(pageName, out title))
         {
@@ -321,7 +401,7 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
                     ? "<span class=\"nav-badge\">" + openProforma.ToString(CultureInfo.InvariantCulture) + "</span>"
                     : "";
 
-                // ── سفارش‌های خدمات در انتظار تسویه (جدید) ──
+                // ── سفارش‌های خدمات در انتظار تسویه ──
                 int pendingServices = 0;
                 using (SqlCommand cmd = new SqlCommand(
                     "SELECT COUNT(*) FROM ServiceOrders " +
@@ -334,7 +414,7 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
                     ? "<span class=\"nav-badge nav-badge--info\">" + pendingServices.ToString(CultureInfo.InvariantCulture) + "</span>"
                     : "";
 
-                // ── دوره‌های بسته‌شده منتظر تقسیم (جدید) ──
+                // ── دوره‌های بسته‌شده منتظر تقسیم ──
                 int pendingPeriods = 0;
                 using (SqlCommand cmd = new SqlCommand(
                     "SELECT COUNT(*) FROM ProfitPeriods WHERE Status = 2", conn))
@@ -345,6 +425,38 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
                 litPeriodsBadge.Text = pendingPeriods > 0
                     ? "<span class=\"nav-badge nav-badge--warn\">" + pendingPeriods.ToString(CultureInfo.InvariantCulture) + "</span>"
                     : "";
+
+                // ── فاکتورهای در انتظار بازاریاب جاری ──
+                long myUserId = 0;
+                try
+                {
+                    if (Session["UserId"] != null)
+                        myUserId = Convert.ToInt64(Session["UserId"]);
+                }
+                catch { }
+
+                if (myUserId > 0)
+                {
+                    int myPending = 0;
+                    using (SqlCommand cmd = new SqlCommand(
+                        "SELECT COUNT(*) FROM ProformaInvoices " +
+                        "WHERE MarketerId = @Mid AND IsDeleted = 0 " +
+                        "  AND Status NOT IN (3, 4, 5) " +
+                        "  AND ValidUntil >= GETDATE()", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Mid", myUserId);
+                        object o = cmd.ExecuteScalar();
+                        myPending = (o == null || o == DBNull.Value) ? 0 : Convert.ToInt32(o);
+                    }
+
+                    litMyInvoicesBadge.Text = myPending > 0
+                        ? "<span class=\"nav-badge\">" + myPending.ToString(CultureInfo.InvariantCulture) + "</span>"
+                        : "";
+                }
+                else
+                {
+                    litMyInvoicesBadge.Text = "";
+                }
             }
         }
         catch
@@ -354,6 +466,7 @@ public partial class admin_AdminMaster : System.Web.UI.MasterPage
             litProformaBadge.Text = "";
             litServiceBadge.Text = "";
             litPeriodsBadge.Text = "";
+            litMyInvoicesBadge.Text = "";
         }
     }
 

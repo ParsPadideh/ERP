@@ -607,7 +607,24 @@ public partial class admin_sales_presentation : System.Web.UI.Page
             {
                 conn.Open();
                 string proformaNumber = GenerateProformaNumber(conn);
-                int marketerId = GetCustomerMarketerId(conn, customerId);
+                // ── اگر کاربر بازاریاب است، MarketerId خودش را ثبت کن ──
+                int marketerId = 0;
+                bool isMarketerRole = false;
+                try
+                {
+                    isMarketerRole = Session["PrimaryRole"] != null &&
+                        string.Equals(Convert.ToString(Session["PrimaryRole"]), "بازاریاب", StringComparison.OrdinalIgnoreCase);
+                }
+                catch { }
+
+                if (isMarketerRole && CurrentUserId > 0)
+                {
+                    marketerId = (int)CurrentUserId;
+                }
+                else
+                {
+                    marketerId = GetCustomerMarketerId(conn, customerId);
+                }
 
                 using (SqlTransaction tran = conn.BeginTransaction())
                 {

@@ -260,8 +260,6 @@
         .nav-group-body .nav-item { padding-right: 30px; font-size: 12.5px; }
     </style>
 
-
-
 <style>
     /* RTL Select2 */
     .select2-container--default .select2-selection--single {
@@ -308,183 +306,153 @@
     .select2-search--dropdown {
         padding: 8px !important;
     }
-    /* مخفی‌کردن Select2 در چاپ */
     @media print {
         .select2-container { display: none !important; }
     }
 </style>
 
-<!-- Select2 JS (در انتهای head) -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        /* ═══════════════════════════════════════════════════
-   Select2 — Custom RTL Theme
-   ═══════════════════════════════════════════════════ */
-.select2-container {
-    font-family: 'Vazirmatn', Tahoma, sans-serif !important;
-    direction: rtl !important;
-}
-
-/* Single Select - Closed state */
-.select2-container--default .select2-selection--single {
-    height: 40px !important;
-    border: 1px solid #eef2f6 !important;
-    border-radius: 10px !important;
-    background: #f8fafc !important;
-    padding: 5px 12px 5px 32px !important;
-    transition: all .15s !important;
-}
-.select2-container--default.select2-container--focus .select2-selection--single,
-.select2-container--default.select2-container--open .select2-selection--single {
-    border-color: #2563eb !important;
-    background: #fff !important;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 28px !important;
-    font-size: 13.5px !important;
-    color: #334155 !important;
-    padding: 0 !important;
-    font-weight: 500 !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__placeholder {
-    color: #94a3b8 !important;
-    font-weight: 500 !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 38px !important;
-    left: 8px !important;
-    right: auto !important;
-    width: 20px !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__arrow b {
-    border-color: #64748b transparent transparent transparent !important;
-    border-width: 5px 4px 0 4px !important;
-    margin-top: -3px !important;
-}
-
-/* Larger variant */
-.select2-container.select2-lg .select2-selection--single {
-    height: 44px !important;
-    padding: 8px 12px 8px 32px !important;
-}
-.select2-container.select2-lg .select2-selection--single .select2-selection__rendered {
-    line-height: 26px !important;
-    font-size: 14px !important;
-}
-.select2-container.select2-lg .select2-selection--single .select2-selection__arrow {
-    height: 42px !important;
-}
-
-/* Dropdown Panel */
-.select2-dropdown {
-    border: 1px solid #eef2f6 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 12px 36px -10px rgba(15, 23, 42, 0.2) !important;
-    padding: 4px !important;
-    overflow: hidden !important;
-    z-index: 9999 !important;
-}
-.select2-dropdown--below {
-    margin-top: 4px !important;
-}
-.select2-dropdown--above {
-    margin-bottom: 4px !important;
-}
-
-/* Search input */
-.select2-search--dropdown {
-    padding: 6px !important;
-}
-.select2-search--dropdown .select2-search__field {
-    border: 1px solid #eef2f6 !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-family: 'Vazirmatn', Tahoma, sans-serif !important;
-    font-size: 13px !important;
-    direction: rtl !important;
-    background: #f8fafc !important;
-    width: 100% !important;
-    outline: none !important;
-}
-.select2-search--dropdown .select2-search__field:focus {
-    border-color: #2563eb !important;
-    background: #fff !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
-}
-
-/* Results */
-.select2-results__options {
-    max-height: 280px !important;
-}
-.select2-results__option {
-    padding: 8px 12px !important;
-    font-size: 13px !important;
-    direction: rtl !important;
-    text-align: right !important;
-    border-radius: 6px !important;
-    margin: 1px 0 !important;
-    color: #334155 !important;
-    transition: background .12s !important;
-}
-.select2-results__option--highlighted[aria-selected] {
-    background-color: #2563eb !important;
-    color: #fff !important;
-}
-.select2-results__option[aria-selected="true"] {
-    background-color: #eff6ff !important;
-    color: #1e40af !important;
-    font-weight: 700 !important;
-}
-.select2-results__option[aria-selected="true"].select2-results__option--highlighted {
-    background-color: #2563eb !important;
-    color: #fff !important;
-}
-.select2-results__message,
-.select2-results__option--load-more {
-    font-size: 12.5px !important;
-    color: #94a3b8 !important;
-    text-align: center !important;
-    padding: 10px !important;
-    font-style: italic !important;
-}
-
-/* Clear button */
-.select2-container--default .select2-selection--single .select2-selection__clear {
-    color: #ef4444 !important;
-    font-size: 16px !important;
-    font-weight: bold !important;
-    margin-left: 4px !important;
-    padding: 0 4px !important;
-    background: transparent !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__clear:hover {
-    background: #fef2f2 !important;
-}
-
-/* Hidden <select> should be visually hidden but valid */
-.select2-hidden-accessible {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    overflow: hidden !important;
-    clip: rect(0,0,0,0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-}
-
-/* Print: hide Select2, show original values as text */
-@media print {
-    .select2-container { display: none !important; }
-}
-    </style>
-    <!-- Select2 JS (در انتهای head) -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container {
+        font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+        direction: rtl !important;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 40px !important;
+        border: 1px solid #eef2f6 !important;
+        border-radius: 10px !important;
+        background: #f8fafc !important;
+        padding: 5px 12px 5px 32px !important;
+        transition: all .15s !important;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+        border-color: #2563eb !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px !important;
+        font-size: 13.5px !important;
+        color: #334155 !important;
+        padding: 0 !important;
+        font-weight: 500 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px !important;
+        left: 8px !important;
+        right: auto !important;
+        width: 20px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: #64748b transparent transparent transparent !important;
+        border-width: 5px 4px 0 4px !important;
+        margin-top: -3px !important;
+    }
+    .select2-container.select2-lg .select2-selection--single {
+        height: 44px !important;
+        padding: 8px 12px 8px 32px !important;
+    }
+    .select2-container.select2-lg .select2-selection--single .select2-selection__rendered {
+        line-height: 26px !important;
+        font-size: 14px !important;
+    }
+    .select2-container.select2-lg .select2-selection--single .select2-selection__arrow {
+        height: 42px !important;
+    }
+    .select2-dropdown {
+        border: 1px solid #eef2f6 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 12px 36px -10px rgba(15, 23, 42, 0.2) !important;
+        padding: 4px !important;
+        overflow: hidden !important;
+        z-index: 9999 !important;
+    }
+    .select2-dropdown--below { margin-top: 4px !important; }
+    .select2-dropdown--above { margin-bottom: 4px !important; }
+    .select2-search--dropdown { padding: 6px !important; }
+    .select2-search--dropdown .select2-search__field {
+        border: 1px solid #eef2f6 !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+        font-size: 13px !important;
+        direction: rtl !important;
+        background: #f8fafc !important;
+        width: 100% !important;
+        outline: none !important;
+    }
+    .select2-search--dropdown .select2-search__field:focus {
+        border-color: #2563eb !important;
+        background: #fff !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    }
+    .select2-results__options { max-height: 280px !important; }
+    .select2-results__option {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        direction: rtl !important;
+        text-align: right !important;
+        border-radius: 6px !important;
+        margin: 1px 0 !important;
+        color: #334155 !important;
+        transition: background .12s !important;
+    }
+    .select2-results__option--highlighted[aria-selected] {
+        background-color: #2563eb !important;
+        color: #fff !important;
+    }
+    .select2-results__option[aria-selected="true"] {
+        background-color: #eff6ff !important;
+        color: #1e40af !important;
+        font-weight: 700 !important;
+    }
+    .select2-results__option[aria-selected="true"].select2-results__option--highlighted {
+        background-color: #2563eb !important;
+        color: #fff !important;
+    }
+    .select2-results__message,
+    .select2-results__option--load-more {
+        font-size: 12.5px !important;
+        color: #94a3b8 !important;
+        text-align: center !important;
+        padding: 10px !important;
+        font-style: italic !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        color: #ef4444 !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        margin-left: 4px !important;
+        padding: 0 4px !important;
+        background: transparent !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__clear:hover {
+        background: #fef2f2 !important;
+    }
+    .select2-hidden-accessible {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0,0,0,0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
+    @media print {
+        .select2-container { display: none !important; }
+    }
+</style>
 
     <asp:ContentPlaceHolder ID="head" runat="server" />
 </head>
@@ -511,15 +479,17 @@
         <nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-3">
 
             <!-- اصلی -->
-            <div class="nav-section-label">اصلی</div>
-            <a href="Default.aspx" class='nav-item <%= IsActive("Default.aspx") ? "active" : "" %>'>
-                <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layout-dashboard"></i></span>
-                <span>داشبورد</span>
-            </a>
-            <a href="reports-hub.aspx" class='nav-item <%= IsActive("reports-hub.aspx") ? "active" : "" %>'>
-    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layout-grid"></i></span>
-    <span>مرکز گزارش‌ها</span>
-</a>
+            <asp:Panel ID="pnlSectionMain" runat="server">
+                <div class="nav-section-label">اصلی</div>
+                <a href="Default.aspx" class='nav-item <%= IsActive("Default.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layout-dashboard"></i></span>
+                    <span>داشبورد</span>
+                </a>
+                <a href="reports-hub.aspx" class='nav-item <%= IsActive("reports-hub.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="layout-grid"></i></span>
+                    <span>مرکز گزارش‌ها</span>
+                </a>
+            </asp:Panel>
 
             <!-- داده‌های پایه -->
             <asp:Panel ID="pnlSectionBase" runat="server">
@@ -596,7 +566,7 @@
                 </a>
             </asp:Panel>
 
-            <!-- خدمات (جدید) -->
+            <!-- خدمات -->
             <asp:Panel ID="pnlSectionServices" runat="server">
                 <div class="nav-section-label">خدمات</div>
                 <a href="service-orders.aspx" class='nav-item <%= IsActive("service-orders.aspx") %> <%= IsActive("service-receipt.aspx") ? "active" : "" %>'>
@@ -664,6 +634,20 @@
                 <a href="profit-settings.aspx" class='nav-item <%= IsActive("profit-settings.aspx") ? "active" : "" %>'>
                     <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="settings-2"></i></span>
                     <span>تنظیمات تقسیم سود</span>
+                </a>
+            </asp:Panel>
+
+            <!-- فروش و بازاریابی (فقط برای بازاریاب) -->
+            <asp:Panel ID="pnlSectionMarketer" runat="server" Visible="false">
+                <div class="nav-section-label">فروش و بازاریابی</div>
+                <a href="sales-presentation.aspx" class='nav-item <%= IsActive("sales-presentation.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="store"></i></span>
+                    <span>کاتالوگ فروش</span>
+                </a>
+                <a href="my-invoices.aspx" class='nav-item <%= IsActive("my-invoices.aspx") ? "active" : "" %>'>
+                    <span class="nav-icon"><i class="h-[18px] w-[18px]" data-lucide="receipt"></i></span>
+                    <span>فاکتورهای من</span>
+                    <asp:Literal ID="litMyInvoicesBadge" runat="server" />
                 </a>
             </asp:Panel>
 
@@ -754,49 +738,51 @@
                         <i class="h-4 w-4" data-lucide="refresh-cw"></i>
                     </a>
 
-                    <!-- Notifications -->
-                    <div class="relative">
-                        <button type="button" onclick="toggleDropdown('notifDropdown'); return false;"
-                            class="icon-button relative">
-                            <i class="h-4 w-4" data-lucide="bell"></i>
-                            <asp:Literal ID="litNotifDot" runat="server" />
-                        </button>
+                    <!-- Notifications (فقط برای ادمین و مدیر بهره‌برداری) -->
+                    <asp:Panel ID="pnlNotifications" runat="server">
+                        <div class="relative">
+                            <button type="button" onclick="toggleDropdown('notifDropdown'); return false;"
+                                class="icon-button relative">
+                                <i class="h-4 w-4" data-lucide="bell"></i>
+                                <asp:Literal ID="litNotifDot" runat="server" />
+                            </button>
 
-                        <div id="notifDropdown" class="dropdown-menu w-[360px]">
-                            <div class="flex items-center justify-between border-b border-surface-line px-4 py-3">
-                                <p class="text-[13px] font-extrabold text-ink-900">اعلان‌ها</p>
-                                <asp:Literal ID="litNotifCount" runat="server" />
-                            </div>
-                            <div class="max-h-[360px] overflow-y-auto dashboard-scrollbar">
-                                <asp:Repeater ID="rptNotifications" runat="server">
-                                    <ItemTemplate>
-                                        <a href='<%# Eval("Link") %>'
-                                            class="flex items-start gap-3 border-b border-surface-line/50 px-4 py-3 transition hover:bg-surface-body">
-                                            <span class='<%# GetNotifIconCss(Eval("Type")) %>'>
-                                                <i class="h-4 w-4" data-lucide='<%# GetNotifIcon(Eval("Type")) %>'></i>
-                                            </span>
-                                            <div class="min-w-0 flex-1">
-                                                <p class="text-[12.5px] font-bold text-ink-800">
-                                                    <%# HttpUtility.HtmlEncode(Eval("Title")) %>
-                                                </p>
-                                                <p class="mt-0.5 text-[11.5px] text-ink-500">
-                                                    <%# HttpUtility.HtmlEncode(Eval("Description")) %>
-                                                </p>
-                                                <p class="mt-1 text-[10.5px] font-semibold text-ink-400">
-                                                    <%# Eval("TimeText") %>
-                                                </p>
-                                            </div>
-                                        </a>
-                                    </ItemTemplate>
-                                </asp:Repeater>
-                            </div>
-                            <div class="border-t border-surface-line bg-surface-body px-4 py-2.5 text-center">
-                                <a href="stock-onhand.aspx" class="text-[12px] font-bold text-brand-600 hover:underline">
-                                    مشاهده موجودی انبار
-                                </a>
+                            <div id="notifDropdown" class="dropdown-menu w-[360px]">
+                                <div class="flex items-center justify-between border-b border-surface-line px-4 py-3">
+                                    <p class="text-[13px] font-extrabold text-ink-900">اعلان‌ها</p>
+                                    <asp:Literal ID="litNotifCount" runat="server" />
+                                </div>
+                                <div class="max-h-[360px] overflow-y-auto dashboard-scrollbar">
+                                    <asp:Repeater ID="rptNotifications" runat="server">
+                                        <ItemTemplate>
+                                            <a href='<%# Eval("Link") %>'
+                                                class="flex items-start gap-3 border-b border-surface-line/50 px-4 py-3 transition hover:bg-surface-body">
+                                                <span class='<%# GetNotifIconCss(Eval("Type")) %>'>
+                                                    <i class="h-4 w-4" data-lucide='<%# GetNotifIcon(Eval("Type")) %>'></i>
+                                                </span>
+                                                <div class="min-w-0 flex-1">
+                                                    <p class="text-[12.5px] font-bold text-ink-800">
+                                                        <%# HttpUtility.HtmlEncode(Eval("Title")) %>
+                                                    </p>
+                                                    <p class="mt-0.5 text-[11.5px] text-ink-500">
+                                                        <%# HttpUtility.HtmlEncode(Eval("Description")) %>
+                                                    </p>
+                                                    <p class="mt-1 text-[10.5px] font-semibold text-ink-400">
+                                                        <%# Eval("TimeText") %>
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                                <div class="border-t border-surface-line bg-surface-body px-4 py-2.5 text-center">
+                                    <a href="stock-onhand.aspx" class="text-[12px] font-bold text-brand-600 hover:underline">
+                                        مشاهده موجودی انبار
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </asp:Panel>
 
                     <!-- User menu -->
                     <div class="relative">
@@ -925,23 +911,13 @@
     });
 </script>
 
-
-    <script type="text/javascript">
-    // ═══════════════════════════════════════════════════════
-    // Select2 Auto-Init — برای همه Dropdown های دارای کلاس .select2-search
-    // ═══════════════════════════════════════════════════════
+<script type="text/javascript">
     function initAllSelect2() {
-        if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') {
-            return;
-        }
+        if (typeof jQuery === 'undefined' || typeof jQuery.fn.select2 === 'undefined') return;
 
         jQuery('.select2-search').each(function () {
             var $el = jQuery(this);
-
-            // Already initialized? Skip
             if ($el.hasClass('select2-hidden-accessible')) return;
-
-            // Skip empty dropdowns (only placeholder)
             if ($el.find('option').length <= 1) return;
 
             var placeholder = $el.attr('data-placeholder') || '— جستجو —';
@@ -964,7 +940,6 @@
                 }
             });
 
-            // Auto-postback on select
             if (autoPostback) {
                 $el.on('select2:select', function () {
                     if (typeof __doPostBack === 'function') {
@@ -978,27 +953,16 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // ═══════════════════════════════════════════════════════
-    // Initialize on DOM ready
-    // ═══════════════════════════════════════════════════════
     if (typeof jQuery !== 'undefined') {
-        jQuery(document).ready(function () {
-            initAllSelect2();
-        });
+        jQuery(document).ready(function () { initAllSelect2(); });
     }
 
-    // ═══════════════════════════════════════════════════════
-    // Re-initialize after async PostBack (UpdatePanel)
-    // ═══════════════════════════════════════════════════════
     if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
         Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
             setTimeout(initAllSelect2, 100);
         });
     }
 
-    // ═══════════════════════════════════════════════════════
-    // Re-initialize on window load
-    // ═══════════════════════════════════════════════════════
     window.addEventListener('load', function () {
         setTimeout(initAllSelect2, 100);
     });
