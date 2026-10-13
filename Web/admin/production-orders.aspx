@@ -158,10 +158,10 @@
                     <asp:ListItem Value="3" Text="تکمیل‌شده" />
                     <asp:ListItem Value="4" Text="لغو‌شده" />
                 </asp:DropDownList>
-
-                <asp:DropDownList ID="ddlFilterProduct" runat="server" AutoPostBack="true"
+                 
+                <asp:DropDownList ID="ddlFilterProduct" runat="server" AutoPostBack="true" data-placeholder="- انتخاب محصول-"
                     OnSelectedIndexChanged="FilterChanged"
-                    CssClass="h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600">
+                    CssClass="select2-search h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600">
                 </asp:DropDownList>
 
             </div>
@@ -360,9 +360,9 @@
                     <span class="text-[13px] font-semibold text-ink-700">
                         محصول نهایی <span class="text-danger-500">*</span>
                     </span>
-                    <asp:DropDownList ID="ddlProduct" runat="server"
+                    <asp:DropDownList ID="ddlProduct" runat="server" data-placeholder="-انتخاب محصول-"
                         AutoPostBack="true" OnSelectedIndexChanged="ddlProduct_SelectedIndexChanged"
-                        CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                        CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                     </asp:DropDownList>
                 </label>
 
@@ -370,8 +370,8 @@
                     <span class="text-[13px] font-semibold text-ink-700">
                         BOM <span class="text-danger-500">*</span>
                     </span>
-                    <asp:DropDownList ID="ddlBom" runat="server"
-                        CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                    <asp:DropDownList ID="ddlBom" runat="server" data-placeholder="- انتخاب بوم-"
+                        CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                     </asp:DropDownList>
                     <p class="mt-1 text-[11px] text-ink-400">فقط BOM فعال</p>
                 </label>
@@ -449,8 +449,8 @@
                         <div class="grid gap-3 md:grid-cols-4">
                             <label class="block md:col-span-2">
                                 <span class="text-[12.5px] font-semibold text-ink-700">ماده اولیه</span>
-                                <asp:DropDownList ID="ddlMaterial" runat="server"
-                                    CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600">
+                                <asp:DropDownList ID="ddlMaterial" runat="server" data-placeholder="- جستجو در مواد اولیه -"
+                                    CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600">
                                 </asp:DropDownList>
                             </label>
 

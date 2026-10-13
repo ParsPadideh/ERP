@@ -200,15 +200,14 @@
                         placeholder="جستجو در شماره سفارش، نام مشتری یا یادداشت..." />
                 </label>
 
-                <asp:DropDownList ID="ddlFilterCustomer" runat="server" AutoPostBack="true"
+                <asp:DropDownList ID="ddlFilterCustomer" data-placeholder="- انتخاب مشتری-" runat="server" AutoPostBack="true"
                     OnSelectedIndexChanged="ddlFilterCustomer_SelectedIndexChanged"
-                    CssClass="h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                    CssClass="select2-search h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                 </asp:DropDownList>
 
                 <asp:Button ID="btnClearFilters" runat="server" Text="پاک کردن فیلترها"
                     OnClick="btnClearFilters_Click"
                     CssClass="inline-flex h-11 items-center justify-center gap-2 rounded-base border border-surface-line bg-surface-card px-4 text-[13px] font-semibold text-ink-700 hover:bg-surface-muted" />
-
             </div>
         </section>
 
@@ -443,8 +442,8 @@
                             مشتری <span class="text-danger-500">*</span>
                         </span>
                         <asp:DropDownList ID="ddlCustomer" runat="server" AutoPostBack="true"
-                            OnSelectedIndexChanged="ddlCustomer_SelectedIndexChanged"
-                            CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                            OnSelectedIndexChanged="ddlCustomer_SelectedIndexChanged" data-placeholder="— جستجو در مشتریان —"
+                            CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                         </asp:DropDownList>
                         <p class="mt-1 text-[11px] text-ink-400">
                             <asp:Literal ID="litCustomerInfo" runat="server" />
@@ -466,7 +465,8 @@
                         <span class="text-[13px] font-semibold text-ink-700">کانال فروش</span>
                         <asp:DropDownList ID="ddlChannel" runat="server" AutoPostBack="true"
                             OnSelectedIndexChanged="ddlChannel_SelectedIndexChanged"
-                            CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                            CssClass=" mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                          <asp:ListItem Value="-1" Text="-انتخاب کنید-" />
                             <asp:ListItem Value="1" Text="بازاریاب" />
                             <asp:ListItem Value="2" Text="آنلاین" />
                             <asp:ListItem Value="3" Text="ادمین (حضوری/تلفنی)" />
@@ -476,8 +476,8 @@
                     <asp:Panel ID="pnlMarketer" runat="server" Visible="false">
                         <label class="block">
                             <span class="text-[13px] font-semibold text-ink-700">بازاریاب مسئول</span>
-                            <asp:DropDownList ID="ddlMarketer" runat="server"
-                                CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                            <asp:DropDownList ID="ddlMarketer" runat="server" data-placeholder="— جستجو در بازاریابان —"
+                                CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                             </asp:DropDownList>
                         </label>
                     </asp:Panel>

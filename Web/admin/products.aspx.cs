@@ -44,6 +44,16 @@ public partial class admin_products : System.Web.UI.Page
         }
     }
 
+    // ═══════════════════════════════════════════════════════
+    // Markup Helper — for ASPX
+    // ═══════════════════════════════════════════════════════
+    protected bool HasProductImage(object imageUrlObj)
+    {
+        if (imageUrlObj == null || imageUrlObj == DBNull.Value) return false;
+        string url = Convert.ToString(imageUrlObj).Trim();
+        return url.Length > 0;
+    }
+
     // ─────────────────────────────────────────────────────
     // Lifecycle
     // ─────────────────────────────────────────────────────
@@ -57,7 +67,6 @@ public partial class admin_products : System.Web.UI.Page
             LoadStats();
             LoadProducts();
 
-            // پیش‌فرض: مواد اولیه
             rbTypeRM.Checked = true;
         }
     }
@@ -408,7 +417,7 @@ public partial class admin_products : System.Web.UI.Page
                     "  SELECT ROW_NUMBER() OVER (ORDER BY p.ProductId DESC) AS RowNum, " +
                     "    p.ProductId, p.ProductCode, p.ProductName, p.ProductType, " +
                     "    p.WeightGram, p.MinStock, p.MaxStock, p.ShelfLifeDays, " +
-                    "    p.RequiresBatch, p.IsActive, p.IsDeleted, " +
+                    "    p.RequiresBatch, p.IsActive, p.IsDeleted, p.ImageUrl, " +
                     "    ISNULL(c.CategoryName, N'—') AS CategoryName, " +
                     "    u.UnitName, u.Symbol, " +
                     "    ISNULL((SELECT SUM(sl.QuantityRemaining) FROM StockLayers sl " +
@@ -513,7 +522,7 @@ public partial class admin_products : System.Web.UI.Page
                 string sql =
                     "SELECT ProductId, ProductCode, ProductName, CategoryId, ProductType, " +
                     "       UnitId, WeightGram, Description, MinStock, MaxStock, " +
-                    "       ShelfLifeDays, RequiresBatch, IsActive " +
+                    "       ShelfLifeDays, RequiresBatch, IsActive, ImageUrl " +
                     "FROM Products WHERE ProductId = @Id";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -530,7 +539,6 @@ public partial class admin_products : System.Web.UI.Page
                             txtDescription.Text = dr["Description"] == DBNull.Value
                                 ? "" : Convert.ToString(dr["Description"]);
 
-                            // نوع محصول — RadioButtons
                             int type = dr["ProductType"] == DBNull.Value
                                 ? 1 : Convert.ToInt32(dr["ProductType"]);
 
@@ -538,7 +546,6 @@ public partial class admin_products : System.Web.UI.Page
                             rbTypeFG.Checked = (type == 2);
                             rbTypePackaging.Checked = (type == 3);
 
-                            // دسته
                             ddlCategory.ClearSelection();
                             if (dr["CategoryId"] == DBNull.Value)
                             {
@@ -552,7 +559,6 @@ public partial class admin_products : System.Web.UI.Page
                                 if (cItem != null) cItem.Selected = true;
                             }
 
-                            // واحد
                             ddlUnit.ClearSelection();
                             if (dr["UnitId"] != DBNull.Value)
                             {
@@ -578,6 +584,14 @@ public partial class admin_products : System.Web.UI.Page
                             ddlIsActive.ClearSelection();
                             ListItem activeItem = ddlIsActive.Items.FindByValue(isActive ? "1" : "0");
                             if (activeItem != null) activeItem.Selected = true;
+
+                            // ✅ عکس فعلی
+                            string existingImage = dr["ImageUrl"] == DBNull.Value
+                                ? "" : Convert.ToString(dr["ImageUrl"]);
+                            hfExistingImageUrl.Value = existingImage;
+                            imgProductPreview.ImageUrl = ImageHelper.GetProductImageUrl(
+                                existingImage, Request.ApplicationPath);
+                            chkRemoveImage.Checked = false;
 
                             litFormTitle.Text = "ویرایش محصول — " + Convert.ToString(dr["ProductName"]);
 
@@ -606,7 +620,7 @@ public partial class admin_products : System.Web.UI.Page
     {
         if (rbTypeFG.Checked) return 2;
         if (rbTypePackaging.Checked) return 3;
-        return 1; // پیش‌فرض: RM
+        return 1;
     }
 
     // ─────────────────────────────────────────────────────
@@ -624,7 +638,6 @@ public partial class admin_products : System.Web.UI.Page
 
         int productType = GetSelectedProductType();
 
-        // واحد
         int unitId;
         if (!int.TryParse(ddlUnit.SelectedValue, out unitId))
         {
@@ -632,7 +645,6 @@ public partial class admin_products : System.Web.UI.Page
             return;
         }
 
-        // دسته (اختیاری)
         int? categoryId = null;
         if (!string.IsNullOrEmpty(ddlCategory.SelectedValue))
         {
@@ -641,7 +653,6 @@ public partial class admin_products : System.Web.UI.Page
                 categoryId = cid;
         }
 
-        // اعتبارسنجی
         if (productCode.Length == 0)
         {
             ShowMessage("کد محصول را وارد کنید.");
@@ -731,6 +742,34 @@ public partial class admin_products : System.Web.UI.Page
             return;
         }
 
+        // ═══════════════════════════════════════════════════════
+        // ✅ پردازش عکس
+        // ═══════════════════════════════════════════════════════
+        string finalImageUrl = hfExistingImageUrl.Value;
+        string oldImageUrl = hfExistingImageUrl.Value;
+
+        if (chkRemoveImage.Checked)
+        {
+            finalImageUrl = "";
+        }
+        else if (fuProductImage.HasFile)
+        {
+            string uploadError;
+            string newImageUrl = ImageHelper.SaveProductImage(
+                fuProductImage, Server, productCode, out uploadError);
+
+            if (!string.IsNullOrEmpty(uploadError))
+            {
+                ShowMessage(uploadError);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(newImageUrl))
+            {
+                finalImageUrl = newImageUrl;
+            }
+        }
+
         try
         {
             using (SqlConnection conn = new SqlConnection(ConnStr))
@@ -770,6 +809,7 @@ public partial class admin_products : System.Web.UI.Page
                         "  ProductType = @Type, UnitId = @UnitId, WeightGram = @Weight, " +
                         "  Description = @Description, MinStock = @MinStock, MaxStock = @MaxStock, " +
                         "  ShelfLifeDays = @ShelfLife, RequiresBatch = @RequiresBatch, " +
+                        "  ImageUrl = @ImageUrl, " +
                         "  IsActive = @IsActive, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy " +
                         "WHERE ProductId = @Id";
 
@@ -791,11 +831,19 @@ public partial class admin_products : System.Web.UI.Page
                         cmd.Parameters.AddWithValue("@ShelfLife",
                             shelfLifeDays.HasValue ? (object)shelfLifeDays.Value : DBNull.Value);
                         cmd.Parameters.AddWithValue("@RequiresBatch", requiresBatch);
+                        cmd.Parameters.AddWithValue("@ImageUrl",
+                            string.IsNullOrEmpty(finalImageUrl) ? (object)DBNull.Value : finalImageUrl);
                         cmd.Parameters.AddWithValue("@IsActive", isActive);
                         cmd.Parameters.AddWithValue("@UpdatedBy",
                             CurrentUserId > 0 ? (object)CurrentUserId : DBNull.Value);
                         cmd.Parameters.AddWithValue("@Id", currentId);
                         cmd.ExecuteNonQuery();
+                    }
+
+                    // ✅ حذف عکس قدیمی اگر عوض شد
+                    if (oldImageUrl != finalImageUrl && !string.IsNullOrEmpty(oldImageUrl))
+                    {
+                        ImageHelper.DeleteProductImage(oldImageUrl, Server);
                     }
 
                     WriteAudit(conn, "Update", currentId, productName, "ویرایش محصول");
@@ -807,10 +855,10 @@ public partial class admin_products : System.Web.UI.Page
                         "INSERT INTO Products " +
                         "  (ProductCode, ProductName, CategoryId, ProductType, UnitId, " +
                         "   WeightGram, Description, MinStock, MaxStock, ShelfLifeDays, " +
-                        "   RequiresBatch, IsActive, IsDeleted, CreatedAt, CreatedBy) " +
+                        "   RequiresBatch, ImageUrl, IsActive, IsDeleted, CreatedAt, CreatedBy) " +
                         "VALUES (@Code, @Name, @CategoryId, @Type, @UnitId, " +
                         "   @Weight, @Description, @MinStock, @MaxStock, @ShelfLife, " +
-                        "   @RequiresBatch, @IsActive, 0, GETDATE(), @CreatedBy); " +
+                        "   @RequiresBatch, @ImageUrl, @IsActive, 0, GETDATE(), @CreatedBy); " +
                         "SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                     int newId = 0;
@@ -832,6 +880,8 @@ public partial class admin_products : System.Web.UI.Page
                         cmd.Parameters.AddWithValue("@ShelfLife",
                             shelfLifeDays.HasValue ? (object)shelfLifeDays.Value : DBNull.Value);
                         cmd.Parameters.AddWithValue("@RequiresBatch", requiresBatch);
+                        cmd.Parameters.AddWithValue("@ImageUrl",
+                            string.IsNullOrEmpty(finalImageUrl) ? (object)DBNull.Value : finalImageUrl);
                         cmd.Parameters.AddWithValue("@IsActive", isActive);
                         cmd.Parameters.AddWithValue("@CreatedBy",
                             CurrentUserId > 0 ? (object)CurrentUserId : DBNull.Value);
@@ -1391,6 +1441,11 @@ public partial class admin_products : System.Web.UI.Page
             ListItem activeItem = ddlIsActive.Items.FindByValue("1");
             if (activeItem != null) activeItem.Selected = true;
         }
+
+        // ✅ ریست عکس
+        hfExistingImageUrl.Value = "";
+        imgProductPreview.ImageUrl = "~/Images/Products/no-image.png";
+        chkRemoveImage.Checked = false;
     }
 
     private void ShowMessage(string message)

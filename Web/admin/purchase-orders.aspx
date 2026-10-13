@@ -162,9 +162,9 @@
                         placeholder="جستجو در شماره سفارش، نام تأمین‌کننده یا یادداشت..." />
                 </label>
 
-                <asp:DropDownList ID="ddlFilterSupplier" runat="server" AutoPostBack="true"
+                <asp:DropDownList ID="ddlFilterSupplier" runat="server" AutoPostBack="true" data-placeholder="- انتخاب تامین کننده-"
                     OnSelectedIndexChanged="ddlFilterSupplier_SelectedIndexChanged"
-                    CssClass="h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                    CssClass="select2-search h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                 </asp:DropDownList>
 
                 <asp:Button ID="btnClearFilters" runat="server" Text="پاک کردن فیلترها"
@@ -376,8 +376,8 @@
                     <span class="text-[13px] font-semibold text-ink-700">
                         تأمین‌کننده <span class="text-danger-500">*</span>
                     </span>
-                    <asp:DropDownList ID="ddlSupplier" runat="server"
-                        CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                    <asp:DropDownList ID="ddlSupplier" runat="server" data-placeholder="- انتخاب تامین کننده-"
+                        CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                     </asp:DropDownList>
                 </label>
 
@@ -445,7 +445,7 @@
                             محصول <span class="text-danger-500">*</span>
                         </span>
                         <asp:DropDownList ID="ddlItemProduct" runat="server"
-                            CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                            CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                         </asp:DropDownList>
                         <p class="mt-1 text-[11px] text-ink-400">مواد اولیه و بسته‌بندی قابل خرید</p>
                     </label>

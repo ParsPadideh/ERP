@@ -243,9 +243,9 @@
                     <asp:ListItem Value="4" Text="لغو‌شده" />
                 </asp:DropDownList>
 
-                <asp:DropDownList ID="ddlFilterServiceType" runat="server" AutoPostBack="true"
+                <asp:DropDownList ID="ddlFilterServiceType" runat="server" AutoPostBack="true" data-placeholder="- انتخاب کنید-"
                     OnSelectedIndexChanged="FilterChanged"
-                    CssClass="h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600 lg:col-span-2">
+                    CssClass="select2-search h-11 rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600 lg:col-span-2">
                 </asp:DropDownList>
 
                 <asp:DropDownList ID="ddlFilterPaymentMode" runat="server" AutoPostBack="true"
@@ -427,9 +427,9 @@
                         <span class="text-[13px] font-semibold text-ink-700">
                             مشتری <span class="text-danger-500">*</span>
                         </span>
-                        <asp:DropDownList ID="ddlCustomer" runat="server"
+                        <asp:DropDownList ID="ddlCustomer" runat="server" data-placeholder="-انتخاب مشتری-"
                             AutoPostBack="true" OnSelectedIndexChanged="ddlCustomer_SelectedIndexChanged"
-                            CssClass="mt-1.5 h-12 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[15px] text-ink-800 focus:border-brand-600">
+                            CssClass="select2-search mt-1.5 h-12 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[15px] text-ink-800 focus:border-brand-600">
                         </asp:DropDownList>
                         <p class="mt-1.5 text-[11.5px] text-ink-500">
                             <asp:Literal ID="litCustomerHint" runat="server" Text="مشتری را از لیست انتخاب کنید." />
@@ -440,9 +440,9 @@
                         <span class="text-[13px] font-semibold text-ink-700">
                             نوع خدمت <span class="text-danger-500">*</span>
                         </span>
-                        <asp:DropDownList ID="ddlServiceType" runat="server"
+                        <asp:DropDownList ID="ddlServiceType" runat="server" data-placeholder="-انتخاب سرویس-"
                             AutoPostBack="true" OnSelectedIndexChanged="ddlServiceType_SelectedIndexChanged"
-                            CssClass="mt-1.5 h-12 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
+                            CssClass="select2-search mt-1.5 h-12 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[14px] text-ink-700 focus:border-brand-600">
                         </asp:DropDownList>
                         <p class="mt-1.5 text-[11.5px] text-ink-500">
                             نرخ پیش‌فرض:
@@ -756,8 +756,8 @@
                         <span class="text-[12.5px] font-semibold text-ink-700">
                             محصول <span class="text-danger-500">*</span>
                         </span>
-                        <asp:DropDownList ID="ddlInKindProduct" runat="server"
-                            CssClass="mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600">
+                        <asp:DropDownList ID="ddlInKindProduct" runat="server" data-placeholder="- انتخاب محصول-"
+                            CssClass="select2-search mt-1.5 h-10 w-full rounded-base border border-surface-line bg-surface-card px-3 text-[13px] text-ink-700 focus:border-brand-600">
                         </asp:DropDownList>
                     </label>
                     <label class="block">
