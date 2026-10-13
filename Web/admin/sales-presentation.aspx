@@ -3,8 +3,14 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 <style>
+    /* ═══════════════════════════════════════════════════════
+       1. BASE
+       ═══════════════════════════════════════════════════════ */
     body { background: #f8fafc; }
 
+    /* ═══════════════════════════════════════════════════════
+       2. HEADER
+       ═══════════════════════════════════════════════════════ */
     .pres-header {
         background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
         color: #fff;
@@ -29,6 +35,9 @@
         border: 2px solid #fff;
     }
 
+    /* ═══════════════════════════════════════════════════════
+       3. CATEGORY CHIPS
+       ═══════════════════════════════════════════════════════ */
     .category-chips {
         display: flex;
         gap: 8px;
@@ -61,7 +70,9 @@
         box-shadow: 0 4px 12px -4px rgba(37, 99, 235, 0.5);
     }
 
-    /* ═══════════ Product Card ═══════════ */
+    /* ═══════════════════════════════════════════════════════
+       4. PRODUCT CARD
+       ═══════════════════════════════════════════════════════ */
     .product-card {
         background: #fff;
         border-radius: 16px;
@@ -86,7 +97,7 @@
     .product-card.out-of-stock { opacity: 0.55; cursor: not-allowed; }
     .product-card.out-of-stock:hover { transform: none; box-shadow: none; }
 
-    /* ═══════════ Product Image ═══════════ */
+    /* ─── تصویر کارت ─── */
     .product-img {
         aspect-ratio: 1 / 1;
         display: grid;
@@ -112,6 +123,7 @@
     .product-img-gradient-5 { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
     .product-img-gradient-6 { background: linear-gradient(135deg, #f472b6, #ec4899); }
 
+    /* ─── بج سبد ─── */
     .product-cart-badge {
         position: absolute;
         top: 10px;
@@ -131,6 +143,7 @@
         z-index: 2;
     }
 
+    /* ─── بج موجودی ─── */
     .product-stock-badge {
         position: absolute;
         top: 10px;
@@ -147,6 +160,44 @@
     .product-stock-badge.low { color: #d97706; background: rgba(255,251,235,0.95); }
     .product-stock-badge.out { color: #dc2626; background: rgba(254,242,242,0.95); }
 
+    /* ─── دکمه گالری روی کارت ─── */
+    .gallery-btn {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%) translateY(6px);
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 13px;
+        border-radius: 20px;
+        background: rgba(15, 23, 42, 0.82);
+        color: #fff;
+        font-size: 11.5px;
+        font-weight: 800;
+        border: 1px solid rgba(255,255,255,0.2);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        opacity: 0;
+        transition: all .25s cubic-bezier(.4, 0, .2, 1);
+        font-family: inherit;
+    }
+    .product-card:hover .gallery-btn {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    .gallery-btn:hover {
+        background: rgba(37, 99, 235, 0.95);
+        border-color: #60a5fa;
+    }
+    .gallery-btn:active { transform: translateX(-50%) translateY(1px) scale(0.97); }
+
+    @media (max-width: 640px) {
+        .gallery-btn { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
     .product-name {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -156,7 +207,9 @@
         min-height: 34px;
     }
 
-    /* ═══════════ Cart Drawer ═══════════ */
+    /* ═══════════════════════════════════════════════════════
+       5. CART DRAWER
+       ═══════════════════════════════════════════════════════ */
     .cart-drawer {
         position: fixed;
         top: 0;
@@ -186,7 +239,9 @@
     }
     .cart-overlay.open { opacity: 1; visibility: visible; }
 
-    /* ═══════════ Modals ═══════════ */
+    /* ═══════════════════════════════════════════════════════
+       6. MODALS (QTY, CUSTOMER PICKER, etc.)
+       ═══════════════════════════════════════════════════════ */
     .qty-modal {
         position: fixed;
         inset: 0;
@@ -250,6 +305,9 @@
     }
     .qty-input:focus { border-color: #2563eb; }
 
+    /* ═══════════════════════════════════════════════════════
+       7. EMPTY & LOADING
+       ═══════════════════════════════════════════════════════ */
     .empty-products {
         text-align: center;
         padding: 60px 20px;
@@ -276,7 +334,9 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ═══════════ Toast ═══════════ */
+    /* ═══════════════════════════════════════════════════════
+       8. TOAST
+       ═══════════════════════════════════════════════════════ */
     .toast-container {
         position: fixed;
         top: 20px;
@@ -306,12 +366,363 @@
     .toast--error { background: #ef4444; color: #fff; }
     .toast--info { background: #3b82f6; color: #fff; }
 
-    @media (max-width: 640px) {
-        .product-img-icon { font-size: 42px; }
+    /* ═══════════════════════════════════════════════════════
+       9. GALLERY MODAL
+       ═══════════════════════════════════════════════════════ */
+    .gallery-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .gallery-modal.open { display: flex; }
+
+    .gallery-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(8, 12, 25, 0.85);
+        backdrop-filter: blur(6px);
+        animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .gallery-content {
+        position: relative;
+        width: 100%;
+        max-width: 720px;
+        max-height: 94vh;
+        background: #0f172a;
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+        animation: zoomIn .3s cubic-bezier(.4, 0, .2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    @keyframes zoomIn {
+        from { transform: scale(0.94); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
     }
 
+    /* ─── دکمه بستن گالری ─── */
+    .gallery-close {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 5;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all .2s;
+        backdrop-filter: blur(6px);
+    }
+    .gallery-close:hover {
+        background: rgba(239, 68, 68, 0.9);
+        border-color: rgba(239, 68, 68, 1);
+        transform: rotate(90deg);
+    }
+    .gallery-close i { width: 20px; height: 20px; }
+
+    /* ─── هدر گالری ─── */
+    .gallery-header {
+        padding: 16px 60px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        text-align: center;
+    }
+
+    /* ─── محل نمایش عکس اصلی ─── */
+    .gallery-viewer {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 55vh;
+        background: #0a0f1a;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .gallery-main-img {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        object-position: center;
+        border-radius: 12px;
+        user-select: none;
+        -webkit-user-drag: none;
+        background: transparent;
+        cursor: zoom-in;
+    }
+
+    /* ─── دکمه زوم روی عکس ─── */
+    .gallery-zoom-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 5;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all .2s;
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    .gallery-viewer:hover .gallery-zoom-btn {
+        opacity: 1;
+        transform: scale(1);
+    }
+    .gallery-zoom-btn:hover {
+        background: rgba(37, 99, 235, 0.95);
+        border-color: #60a5fa;
+        transform: scale(1.1);
+    }
+    .gallery-zoom-btn i { width: 18px; height: 18px; }
+
+    /* ─── فلش‌های ناوبری ─── */
+    .gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.13);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        cursor: pointer;
+        transition: all .2s;
+        backdrop-filter: blur(6px);
+        z-index: 4;
+        opacity: 0;
+    }
+    .gallery-viewer:hover .gallery-nav { opacity: 1; }
+    .gallery-nav:hover {
+        background: rgba(37, 99, 235, 0.9);
+        transform: translateY(-50%) scale(1.08);
+    }
+    .gallery-nav:disabled { opacity: 0.25; cursor: not-allowed; }
+    .gallery-nav:disabled:hover {
+        background: rgba(255, 255, 255, 0.13);
+        transform: translateY(-50%);
+    }
+    .gallery-nav i { width: 22px; height: 22px; }
+
+    .gallery-nav-prev { right: 12px; }
+    .gallery-nav-next { left: 12px; }
+
+    /* ─── شمارنده ─── */
+    .gallery-counter {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 14px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: 'Vazirmatn', monospace;
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 3;
+    }
+    .gallery-counter span { color: #93c5fd; }
+
+    /* ─── ایموجی fallback ─── */
+    .gallery-emoji {
+        font-size: 140px;
+        filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+        user-select: none;
+    }
+
+    /* ─── Thumbnails ─── */
+    .gallery-thumbnails {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        overflow-x: auto;
+        background: rgba(0, 0, 0, 0.25);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        scrollbar-width: thin;
+        scrollbar-color: #334155 transparent;
+    }
+    .gallery-thumbnails::-webkit-scrollbar { height: 4px; }
+    .gallery-thumbnails::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 2px;
+    }
+
+    .gallery-thumb {
+        flex-shrink: 0;
+        width: 62px;
+        height: 62px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        cursor: pointer;
+        transition: all .2s;
+        background: rgba(255, 255, 255, 0.05);
+        display: grid;
+        place-items: center;
+        position: relative;
+        padding: 0;
+    }
+    .gallery-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .gallery-thumb:hover {
+        border-color: rgba(96, 165, 250, 0.7);
+        transform: translateY(-2px);
+    }
+    .gallery-thumb.active {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+    }
+    .gallery-thumb.is-primary::after {
+        content: "★";
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 10px;
+        color: #fbbf24;
+        text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       10. ZOOM OVERLAY (تمام‌صفحه)
+       ═══════════════════════════════════════════════════════ */
+    .zoom-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.97);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        cursor: zoom-out;
+        animation: fadeIn .2s ease;
+    }
+    .zoom-overlay.open { display: flex; }
+
+    .zoom-overlay img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        border-radius: 8px;
+        cursor: default;
+        user-select: none;
+        -webkit-user-drag: none;
+        animation: zoomIn .25s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .zoom-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        backdrop-filter: blur(8px);
+        transition: all .2s;
+        z-index: 2;
+    }
+    .zoom-close:hover {
+        background: rgba(239, 68, 68, 0.95);
+        border-color: rgba(239, 68, 68, 1);
+        transform: rotate(90deg);
+    }
+    .zoom-close i { width: 22px; height: 22px; }
+
+    .zoom-hint {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 12px;
+        font-weight: 600;
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       11. RESPONSIVE
+       ═══════════════════════════════════════════════════════ */
+    @media (max-width: 640px) {
+        .product-img-icon { font-size: 42px; }
+        .gallery-content { max-height: 98vh; border-radius: 16px; }
+        .gallery-thumb { width: 52px; height: 52px; }
+        .gallery-nav { width: 40px; height: 40px; }
+        .gallery-emoji { font-size: 96px; }
+        .gallery-viewer { height: 45vh; }
+        .zoom-overlay { padding: 12px; }
+        .zoom-close { top: 14px; right: 14px; width: 40px; height: 40px; }
+        .zoom-hint { font-size: 11px; padding: 5px 12px; }
+    }
+
+    @media (max-width: 768px) {
+        .gallery-nav { opacity: 1; }
+        .gallery-zoom-btn { opacity: 1; transform: scale(1); width: 38px; height: 38px; }
+    }
+
+    @media (min-height: 900px) {
+        .gallery-viewer { height: 62vh; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       12. PRINT
+       ═══════════════════════════════════════════════════════ */
     @media print {
-        .cart-drawer, .cart-overlay, .qty-modal, .toast-container { display: none !important; }
+        .cart-drawer,
+        .cart-overlay,
+        .qty-modal,
+        .toast-container,
+        .gallery-modal,
+        .zoom-overlay {
+            display: none !important;
+        }
     }
 </style>
 </asp:Content>
@@ -387,7 +798,7 @@
         </label>
     </section>
 
-    <!-- ═══════════ PRODUCT GRID — ۳ ستون ═══════════ -->
+    <!-- ═══════════ PRODUCT GRID ═══════════ -->
     <section class="pb-24">
         <div id="productGrid"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -399,12 +810,14 @@
                         data-product-name='<%# HttpUtility.HtmlAttributeEncode(Convert.ToString(Eval("ProductName"))) %>'
                         data-product-code='<%# HttpUtility.HtmlAttributeEncode(Convert.ToString(Eval("ProductCode"))) %>'
                         data-category-id='<%# Eval("CategoryId") %>'
+                        data-category-name='<%# HttpUtility.HtmlAttributeEncode(Convert.ToString(Eval("CategoryName"))) %>'
                         data-stock='<%# Eval("AvailableStock") %>'
                         data-unit-name='<%# HttpUtility.HtmlAttributeEncode(Convert.ToString(Eval("UnitName"))) %>'
                         data-price-retail='<%# Eval("PriceRetail") %>'
                         data-price-wholesale='<%# Eval("PriceWholesale") %>'
                         data-price-agent='<%# Eval("PriceAgent") %>'
                         data-price-farmer='<%# Eval("PriceFarmer") %>'
+                        data-emoji='<%# GetProductEmoji(Eval("CategoryName")) %>'
                         onclick='handleProductClick(this);'>
 
                         <div class='<%# GetProductImageWrapperCss(Eval("ImageUrl"), Eval("ProductId"), Eval("CategoryId")) %>'>
@@ -427,6 +840,14 @@
                                 <%# GetStockBadgeText(Eval("AvailableStock"), Eval("UnitName")) %>
                             </span>
                             <span class="product-cart-badge" data-cart-badge style="display:none;">0</span>
+
+                            <!-- دکمه گالری تصاویر -->
+                            <button type="button" class="gallery-btn"
+                                onclick='event.stopPropagation(); openGallery(<%# Eval("ProductId") %>); return false;'
+                                title="مشاهده گالری تصاویر">
+                                <i class="h-3.5 w-3.5" data-lucide="images"></i>
+                                <span>گالری</span>
+                            </button>
                         </div>
 
                         <div class="p-3 flex-1 flex flex-col">
@@ -543,6 +964,52 @@
             </button>
         </div>
     </aside>
+
+    <!-- ═══════════ GALLERY MODAL ═══════════ -->
+    <div id="galleryModal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="گالری تصاویر محصول">
+        <div class="gallery-backdrop" onclick="closeGallery();"></div>
+
+        <div class="gallery-content">
+            <button type="button" class="gallery-close" onclick="closeGallery(); return false;"
+                title="بستن (Esc)">
+                <i data-lucide="x"></i>
+            </button>
+
+            <div class="gallery-header">
+                <p id="galleryProductName" class="text-[15px] font-extrabold text-white truncate"></p>
+                <p id="galleryProductCode" class="mt-0.5 font-mono text-[11px] text-white/55" dir="ltr"></p>
+            </div>
+
+            <div class="gallery-viewer">
+    <button type="button" class="gallery-nav gallery-nav-prev" id="galleryPrevBtn"
+        onclick="galleryPrev(); return false;" title="قبلی">
+        <i data-lucide="chevron-right"></i>
+    </button>
+
+    <img id="galleryMainImg" src="" alt="" class="gallery-main-img" style="display:none;"
+        onclick="openZoom();"
+        onerror="this.style.display='none'; document.getElementById('galleryEmoji').style.display='grid';" />
+
+    <div id="galleryEmoji" class="gallery-emoji" style="display:none;">🌰</div>
+
+    <button type="button" class="gallery-nav gallery-nav-next" id="galleryNextBtn"
+        onclick="galleryNext(); return false;" title="بعدی">
+        <i data-lucide="chevron-left"></i>
+    </button>
+
+    <button type="button" class="gallery-zoom-btn" onclick="openZoom(); return false;"
+        title="نمایش تمام‌صفحه">
+        <i data-lucide="maximize-2"></i>
+    </button>
+
+    <div class="gallery-counter">
+        <span id="galleryCurrent">1</span> / <span id="galleryTotal">1</span>
+    </div>
+</div>
+
+            <div id="galleryThumbs" class="gallery-thumbnails"></div>
+        </div>
+    </div>
 
     <!-- ═══════════ CUSTOMER PICKER MODAL ═══════════ -->
     <div id="customerPickerModal" class="qty-modal" style="z-index:65;">
@@ -781,13 +1248,27 @@
         </div>
     </div>
 
-    <!-- Hidden JSON -->
+    <!-- Hidden JSONs -->
     <asp:Literal ID="litCustomersJson" runat="server" />
-
+    <asp:Literal ID="litProductImagesJson" runat="server" />
+    <!-- ═══════════ ZOOM OVERLAY ═══════════ -->
+<div id="zoomOverlay" class="zoom-overlay" onclick="closeZoom();">
+    <button type="button" class="zoom-close" onclick="event.stopPropagation(); closeZoom(); return false;"
+        title="بستن (Esc)">
+        <i data-lucide="x"></i>
+    </button>
+    <img id="zoomImg" src="" alt=""
+        onclick="event.stopPropagation();"
+        onerror="closeZoom();" />
+    <div class="zoom-hint">برای بستن، کلیک کن یا Esc بزن</div>
+</div>
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="scripts" runat="server">
 <script type="text/javascript">
+    // ═══════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════
     var cart = [];
     var selectedCustomer = null;
     var currentQtyProduct = null;
@@ -795,11 +1276,17 @@
     var allCustomers = [];
     var lastCreatedProformaId = 0;
 
+    // Gallery state
+    var allProductImages = {};   // { productId: [ {imageId, url, isPrimary}, ... ] }
+    var currentGalleryProduct = null;
+    var currentGalleryIndex = 0;
+
     // ═══════════════════════════════════════════════════════
     // INIT
     // ═══════════════════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', function () {
         loadCustomersFromJson();
+        loadProductImagesFromJson();
         buildCategoryChips();
         updateAllProductPrices();
         renderCart();
@@ -809,6 +1296,7 @@
 
     window.addEventListener('load', function () {
         loadCustomersFromJson();
+        loadProductImagesFromJson();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 
@@ -822,6 +1310,201 @@
                 }
             }
         } catch (e) { allCustomers = []; }
+    }
+
+    function loadProductImagesFromJson() {
+        try {
+            var jsonEl = document.getElementById('<%= litProductImagesJson.ClientID %>');
+            if (jsonEl && jsonEl.innerHTML) {
+                var raw = jsonEl.innerHTML.trim();
+                if (raw.length > 0) {
+                    allProductImages = JSON.parse(raw) || {};
+                }
+            }
+        } catch (e) { allProductImages = {}; }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // GALLERY
+    // ═══════════════════════════════════════════════════════
+    function openGallery(productId) {
+        productId = parseInt(productId, 10);
+        if (!productId) return;
+
+        var card = document.querySelector('.product-card[data-product-id="' + productId + '"]');
+        if (!card) return;
+
+        var name = card.getAttribute('data-product-name') || 'محصول';
+        var code = card.getAttribute('data-product-code') || '';
+        var emoji = card.getAttribute('data-emoji') || '🌰';
+
+        var images = allProductImages[String(productId)] || [];
+
+        currentGalleryProduct = {
+            id: productId,
+            name: name,
+            code: code,
+            emoji: emoji,
+            images: images
+        };
+        currentGalleryIndex = 0;
+
+        document.getElementById('galleryProductName').textContent = name;
+        document.getElementById('galleryProductCode').textContent = code;
+        document.getElementById('galleryEmoji').textContent = emoji;
+
+        renderGallery();
+
+        document.getElementById('galleryModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeGallery() {
+        closeZoom(); // بستن زوم در صورت باز بودن
+        document.getElementById('galleryModal').classList.remove('open');
+        var anyOpen = document.querySelector('.cart-drawer.open, .qty-modal.open');
+        if (!anyOpen) document.body.style.overflow = '';
+        currentGalleryProduct = null;
+        currentGalleryIndex = 0;
+    }
+
+    function renderGallery() {
+        if (!currentGalleryProduct) return;
+
+        var images = currentGalleryProduct.images || [];
+        var mainImg = document.getElementById('galleryMainImg');
+        var emojiEl = document.getElementById('galleryEmoji');
+        var thumbsBox = document.getElementById('galleryThumbs');
+        var counter = document.getElementById('galleryCurrent');
+        var total = document.getElementById('galleryTotal');
+        var prevBtn = document.getElementById('galleryPrevBtn');
+        var nextBtn = document.getElementById('galleryNextBtn');
+        var zoomBtn = document.querySelector('.gallery-zoom-btn');
+
+        // حالت بدون عکس
+        if (images.length === 0) {
+            mainImg.style.display = 'none';
+            mainImg.removeAttribute('src');
+            emojiEl.style.display = 'grid';
+            thumbsBox.innerHTML = '';
+            counter.textContent = '0';
+            total.textContent = '0';
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            if (zoomBtn) zoomBtn.style.display = 'none';
+            return;
+        }
+
+        // اگر فقط یک عکس داریم، فلش‌ها را مخفی کن
+        if (images.length === 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'grid';
+            nextBtn.style.display = 'grid';
+        }
+
+        if (zoomBtn) zoomBtn.style.display = 'grid';
+
+        // عکس فعلی
+        var img = images[currentGalleryIndex];
+        mainImg.style.display = 'block';
+        mainImg.src = img.url;
+        mainImg.alt = currentGalleryProduct.name;
+        emojiEl.style.display = 'none';
+
+        counter.textContent = (currentGalleryIndex + 1);
+        total.textContent = images.length;
+
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+
+        // Thumbnails
+        thumbsBox.innerHTML = '';
+        for (var i = 0; i < images.length; i++) {
+            (function (idx) {
+                var thumb = document.createElement('button');
+                thumb.type = 'button';
+                thumb.className = 'gallery-thumb'
+                    + (idx === currentGalleryIndex ? ' active' : '')
+                    + (images[idx].isPrimary ? ' is-primary' : '');
+                thumb.onclick = function () { gotoGalleryImage(idx); };
+                thumb.title = 'تصویر ' + (idx + 1);
+
+                var tImg = document.createElement('img');
+                tImg.src = images[idx].url;
+                tImg.alt = '';
+                tImg.loading = 'lazy';
+                tImg.onerror = function () {
+                    tImg.style.display = 'none';
+                    thumb.textContent = '🌰';
+                };
+                thumb.appendChild(tImg);
+                thumbsBox.appendChild(thumb);
+            })(i);
+        }
+
+        // اسکرول thumbnail فعال به دید
+        setTimeout(function () {
+            var active = thumbsBox.querySelector('.gallery-thumb.active');
+            if (active && active.scrollIntoView) {
+                active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }, 50);
+    }
+
+    function gotoGalleryImage(idx) {
+        if (!currentGalleryProduct) return;
+        var images = currentGalleryProduct.images || [];
+        if (idx < 0 || idx >= images.length) return;
+        currentGalleryIndex = idx;
+        renderGallery();
+    }
+
+    function galleryPrev() {
+        if (!currentGalleryProduct) return;
+        var images = currentGalleryProduct.images || [];
+        if (images.length === 0) return;
+        currentGalleryIndex = (currentGalleryIndex - 1 + images.length) % images.length;
+        renderGallery();
+    }
+
+    function galleryNext() {
+        if (!currentGalleryProduct) return;
+        var images = currentGalleryProduct.images || [];
+        if (images.length === 0) return;
+        currentGalleryIndex = (currentGalleryIndex + 1) % images.length;
+        renderGallery();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ZOOM FULLSCREEN
+    // ═══════════════════════════════════════════════════════
+    function openZoom() {
+        var mainImg = document.getElementById('galleryMainImg');
+        var overlay = document.getElementById('zoomOverlay');
+        var zoomImg = document.getElementById('zoomImg');
+
+        if (!mainImg || !overlay || !zoomImg) return;
+
+        // اگر عکس اصلی مخفی است، زوم نکن
+        if (mainImg.style.display === 'none') return;
+        if (!mainImg.src) return;
+
+        zoomImg.src = mainImg.src;
+        zoomImg.alt = mainImg.alt || '';
+        overlay.classList.add('open');
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeZoom() {
+        var overlay = document.getElementById('zoomOverlay');
+        var zoomImg = document.getElementById('zoomImg');
+        if (overlay) overlay.classList.remove('open');
+        if (zoomImg) zoomImg.removeAttribute('src');
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1070,7 +1753,6 @@
         }
     }
 
-    // Called from server after save
     function handleNewCustomerSaved() {
         try {
             var hf = document.getElementById('<%= hfNewCustomerData.ClientID %>');
@@ -1079,25 +1761,19 @@
             var newCust = JSON.parse(hf.value);
             if (!newCust || !newCust.id) return;
 
-            // Add to list
             allCustomers.push(newCust);
-
-            // Clear hidden
             hf.value = '';
 
-            // Select it
             chooseCustomer(newCust);
             closeNewCustomerModal();
             closeCustomerPicker();
 
             showToast('مشتری جدید ثبت شد: ' + newCust.name, 'success');
-        } catch (e) {
-            // silent
-        }
+        } catch (e) { }
     }
 
     // ═══════════════════════════════════════════════════════
-    // PRODUCT CLICK
+    // PRODUCT CLICK (افزودن به سبد)
     // ═══════════════════════════════════════════════════════
     function handleProductClick(el) {
         if (!selectedCustomer) {
@@ -1123,7 +1799,7 @@
             price: price,
             stock: stock,
             unit: el.getAttribute('data-unit-name') || 'عدد',
-            emoji: '🌰'
+            emoji: el.getAttribute('data-emoji') || '🌰'
         };
 
         var existing = findCartItem(currentQtyProduct.id);
@@ -1131,6 +1807,7 @@
 
         document.getElementById('qtyProductName').textContent = currentQtyProduct.name;
         document.getElementById('qtyProductCode').textContent = currentQtyProduct.code;
+        document.getElementById('qtyProductEmoji').textContent = currentQtyProduct.emoji;
         document.getElementById('qtyUnitPrice').textContent = formatNumber(price);
         document.getElementById('qtyAvailable').textContent = formatNumber(stock) + ' ' + currentQtyProduct.unit;
         document.getElementById('qtyUnitName').textContent = currentQtyProduct.unit;
@@ -1542,7 +2219,32 @@
         document.getElementById('<%= hfCartJson.ClientID %>').value = JSON.stringify(payload);
     }
 
+    // ═══════════════════════════════════════════════════════
+    // KEYBOARD HANDLING — اولویت‌بندی درست
+    // ═══════════════════════════════════════════════════════
     document.addEventListener('keydown', function (e) {
+
+        // ── ۱) اگر زوم باز است، فقط Esc کار می‌کند ──
+        var zoomOverlay = document.getElementById('zoomOverlay');
+        if (zoomOverlay && zoomOverlay.classList.contains('open')) {
+            if (e.key === 'Escape') {
+                closeZoom();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            return;
+        }
+
+        // ── ۲) اگر گالری باز است ──
+        var galleryOpen = document.getElementById('galleryModal').classList.contains('open');
+        if (galleryOpen) {
+            if (e.key === 'Escape') { closeGallery(); e.preventDefault(); return; }
+            if (e.key === 'ArrowRight') { galleryPrev(); e.preventDefault(); return; }
+            if (e.key === 'ArrowLeft') { galleryNext(); e.preventDefault(); return; }
+            return;
+        }
+
+        // ── ۳) بقیه مودال‌ها ──
         if (e.key === 'Escape') {
             closeQtyModal();
             closeCart();

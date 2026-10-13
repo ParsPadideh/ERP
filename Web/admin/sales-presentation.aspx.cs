@@ -46,10 +46,8 @@ public partial class admin_sales_presentation : System.Web.UI.Page
     // ─────────────────────────────────────────────────────
     protected void Page_Load(object sender, EventArgs e)
     {
-        // همیشه JSON مشتریان را لود کن (بعد از افزودن مشتری جدید لازم است)
         LoadCustomersJson();
-
-        // همیشه محصولات را لود کن
+        LoadProductImagesJson();
         LoadProducts();
 
         if (!IsPostBack)
@@ -59,9 +57,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
         }
         else
         {
-            // ═══════════════════════════════════════════════════
-            // ✅ چک کن آیا درخواست ثبت سبد آمده
-            // ═══════════════════════════════════════════════════
             string eventTarget = Request["__EVENTTARGET"];
             if (eventTarget == "submitCartAction")
             {
@@ -205,12 +200,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
                 }
             }
 
-            // اضافه کردن CategoryName به‌عنوان data-attribute برای category-chips
-            if (!dt.Columns.Contains("CategoryName2"))
-                dt.Columns.Add("CategoryName2", typeof(string));
-            foreach (DataRow r in dt.Rows)
-                r["CategoryName2"] = r["CategoryName"];
-
             rptProducts.DataSource = dt;
             rptProducts.DataBind();
         }
@@ -283,6 +272,105 @@ public partial class admin_sales_presentation : System.Web.UI.Page
     }
 
     // ═══════════════════════════════════════════════════════
+    // Load Product Images JSON (for gallery)
+    // ═══════════════════════════════════════════════════════
+    private void LoadProductImagesJson()
+    {
+        try
+        {
+            Dictionary<string, List<Dictionary<string, object>>> result =
+                new Dictionary<string, List<Dictionary<string, object>>>();
+
+            using (SqlConnection conn = new SqlConnection(ConnStr))
+            {
+                conn.Open();
+
+                // ۱) خواندن عکس‌های جدول ProductImages
+                string sqlImages =
+                    "SELECT pi.ProductId, pi.ImageId, pi.ImageUrl, pi.IsPrimary, pi.SortOrder " +
+                    "FROM ProductImages pi " +
+                    "INNER JOIN Products p ON p.ProductId = pi.ProductId " +
+                    "WHERE pi.IsDeleted = 0 " +
+                    "  AND p.IsActive = 1 AND p.IsDeleted = 0 AND p.ProductType = 2 " +
+                    "ORDER BY pi.ProductId, pi.IsPrimary DESC, pi.SortOrder ASC, pi.ImageId ASC";
+
+                using (SqlCommand cmd = new SqlCommand(sqlImages, conn))
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        int productId = Convert.ToInt32(dr["ProductId"]);
+                        string key = productId.ToString(CultureInfo.InvariantCulture);
+
+                        if (!result.ContainsKey(key))
+                            result[key] = new List<Dictionary<string, object>>();
+
+                        // ✅ اینجا ResolveUrl صدا زده می‌شود تا ~ به مسیر واقعی تبدیل شود
+                        string rawUrl = Convert.ToString(dr["ImageUrl"]);
+                        string resolvedUrl = ResolveUrl(rawUrl);
+
+                        Dictionary<string, object> item = new Dictionary<string, object>();
+                        item["imageId"] = Convert.ToInt32(dr["ImageId"]);
+                        item["url"] = resolvedUrl;
+                        item["isPrimary"] = dr["IsPrimary"] != DBNull.Value
+                            && Convert.ToBoolean(dr["IsPrimary"]);
+
+                        result[key].Add(item);
+                    }
+                }
+
+                // ۲) برای محصولاتی که در جدول ProductImages عکس ندارند ولی ImageUrl قدیمی دارند
+                string sqlFallback =
+                    "SELECT p.ProductId, p.ImageUrl " +
+                    "FROM Products p " +
+                    "WHERE p.IsActive = 1 AND p.IsDeleted = 0 AND p.ProductType = 2 " +
+                    "  AND p.ImageUrl IS NOT NULL AND LEN(LTRIM(RTRIM(p.ImageUrl))) > 0 " +
+                    "  AND NOT EXISTS (" +
+                    "      SELECT 1 FROM ProductImages pi " +
+                    "      WHERE pi.ProductId = p.ProductId AND pi.IsDeleted = 0" +
+                    "  )";
+
+                using (SqlCommand cmd = new SqlCommand(sqlFallback, conn))
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        int productId = Convert.ToInt32(dr["ProductId"]);
+                        string key = productId.ToString(CultureInfo.InvariantCulture);
+                        string rawUrl = Convert.ToString(dr["ImageUrl"]).Trim();
+
+                        if (!result.ContainsKey(key))
+                        {
+                            List<Dictionary<string, object>> list =
+                                new List<Dictionary<string, object>>();
+
+                            // ✅ اینجا هم ResolveUrl صدا زده می‌شود
+                            Dictionary<string, object> item = new Dictionary<string, object>();
+                            item["imageId"] = 0;
+                            item["url"] = ResolveUrl(rawUrl);
+                            item["isPrimary"] = true;
+
+                            list.Add(item);
+                            result[key] = list;
+                        }
+                    }
+                }
+            }
+
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            string json = serializer.Serialize(result);
+
+            litProductImagesJson.Text = "<script type=\"application/json\" id=\"" +
+                litProductImagesJson.ClientID + "\">" + json + "</script>";
+        }
+        catch
+        {
+            litProductImagesJson.Text = "<script type=\"application/json\" id=\"" +
+                litProductImagesJson.ClientID + "\">{}</script>";
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
     // SAVE NEW CUSTOMER
     // ═══════════════════════════════════════════════════════
     protected void btnSaveNewCustomer_Click(object sender, EventArgs e)
@@ -300,7 +388,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
             int.TryParse(hfNewCustomerType.Value, out customerType);
             if (customerType < 1 || customerType > 4) customerType = 2;
 
-            // Validation
             if (name.Length == 0)
             {
                 ShowMessage("نام مشتری را وارد کنید.");
@@ -316,14 +403,12 @@ public partial class admin_sales_presentation : System.Web.UI.Page
             {
                 conn.Open();
 
-                // Auto-generate code if empty
                 if (code.Length == 0)
                 {
                     code = GenerateCustomerCode(conn);
                 }
                 else
                 {
-                    // Check duplicate code
                     using (SqlCommand cmd = new SqlCommand(
                         "SELECT COUNT(*) FROM Customers WHERE CustomerCode = @Code AND IsDeleted = 0", conn))
                     {
@@ -336,7 +421,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
                     }
                 }
 
-                // Insert
                 int newCustomerId = 0;
                 string insertSql =
                     "INSERT INTO Customers " +
@@ -373,14 +457,11 @@ public partial class admin_sales_presentation : System.Web.UI.Page
                     return;
                 }
 
-                // Audit
                 WriteAudit(conn, "Insert", "Customers", newCustomerId, name,
                     "ثبت مشتری جدید توسط بازاریاب (کاتالوگ فروش)");
 
-                // Reload customers JSON
                 LoadCustomersJson();
 
-                // Prepare data for JS to auto-select
                 Dictionary<string, object> newCust = new Dictionary<string, object>();
                 newCust["id"] = newCustomerId;
                 newCust["code"] = code;
@@ -392,7 +473,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 hfNewCustomerData.Value = serializer.Serialize(newCust);
 
-                // Clear form
                 txtNewCustomerName.Text = "";
                 txtNewCustomerMobile.Text = "";
                 txtNewCustomerCity.Text = "";
@@ -400,7 +480,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
                 txtNewCustomerEconomicCode.Text = "";
                 txtNewCustomerAddress.Text = "";
 
-                // Trigger JS
                 string script = "setTimeout(function(){ if(typeof handleNewCustomerSaved === 'function') handleNewCustomerSaved(); }, 100);";
                 if (ScriptManager.GetCurrent(this) != null)
                     ScriptManager.RegisterStartupScript(this, GetType(),
@@ -418,7 +497,6 @@ public partial class admin_sales_presentation : System.Web.UI.Page
 
     private string GenerateCustomerCode(SqlConnection conn)
     {
-        // فرمت: C-{YYYYMMDD}-{seq}
         string prefix = "C-" + DateTime.Now.ToString("yyyyMMdd", CultureInfo.InvariantCulture) + "-";
 
         using (SqlCommand cmd = new SqlCommand(

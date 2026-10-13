@@ -7,7 +7,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="mainContent" runat="server">
 
     <asp:HiddenField ID="hfEditProductId" runat="server" Value="0" />
-    <asp:HiddenField ID="hfExistingImageUrl" runat="server" Value="" />
 
     <!-- ═══════════ Page header ═══════════ -->
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -239,79 +238,94 @@
 
             </div>
 
-            <!-- ── بخش ۲.۵: تصویر محصول ── -->
+            <!-- ── بخش ۲.۵: تصاویر محصول ── -->
             <h3 class="mt-6 mb-3 border-t border-surface-line pt-5 flex items-center gap-2 text-[14px] font-semibold text-ink-700">
-                <i class="h-4 w-4 text-brand-500" data-lucide="image"></i>
-                تصویر محصول
+                <i class="h-4 w-4 text-brand-500" data-lucide="images"></i>
+                تصاویر محصول
+                <span class="badge bg-violet-50 text-violet-700" style="font-size:10px;">
+                    چند عکس (ویژه محصول نهایی)
+                </span>
             </h3>
 
             <div class="rounded-base border border-surface-line bg-surface-body p-4">
-                <div class="flex flex-col sm:flex-row gap-5">
 
-                    <!-- پیش‌نمایش عکس -->
-                    <div class="shrink-0">
-                        <div class="relative w-40 h-40 rounded-card border-2 border-dashed border-surface-line overflow-hidden bg-white"
-                            id="imgPreviewBox">
-                            <asp:Image ID="imgProductPreview" runat="server"
-                                ImageUrl="~/Images/Products/no-image.png"
-                                AlternateText="پیش‌نمایش"
-                                CssClass="w-full h-full object-cover" />
-                            <div id="imgPreviewOverlay"
-                                class="absolute inset-0 grid place-items-center bg-black/40 opacity-0 hover:opacity-100 transition cursor-pointer"
-                                onclick="document.getElementById('<%= fuProductImage.ClientID %>').click();">
-                                <i class="h-6 w-6 text-white" data-lucide="camera"></i>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-center text-[11px] text-ink-400">
-                            پیش‌نمایش — کلیک برای تغییر
+                <!-- ─── گالری تصاویر موجود ─── -->
+                <asp:Panel ID="pnlExistingImages" runat="server" Visible="false" CssClass="mb-5">
+                    <div class="mb-2 flex items-center justify-between">
+                        <p class="text-[12px] font-semibold text-ink-600">
+                            تصاویر فعلی
+                            (<asp:Literal ID="litImageCount" runat="server" Text="0" />)
+                        </p>
+                        <p class="text-[11px] text-ink-400">
+                            عکس اصلی در فاکتور و کاتالوگ استفاده می‌شود.
                         </p>
                     </div>
 
-                    <!-- کنترل‌های آپلود -->
-                    <div class="flex-1 min-w-0 space-y-3">
+                    <div class="flex flex-wrap gap-3">
+                        <asp:Repeater ID="rptProductImages" runat="server"
+                            OnItemCommand="rptProductImages_ItemCommand">
+                            <ItemTemplate>
+                                <div class="relative group">
+                                    <img src='<%# ImageHelper.GetProductImageUrl(Convert.ToString(Eval("ImageUrl")), Request.ApplicationPath) %>'
+                                         alt='<%# HttpUtility.HtmlAttributeEncode(Convert.ToString(Eval("ImageUrl"))) %>'
+                                         class="h-24 w-24 shrink-0 rounded-base border-2 border-surface-line object-cover bg-white" />
 
-                        <div>
-                            <span class="text-[13px] font-semibold text-ink-700">
-                                انتخاب فایل جدید
-                            </span>
-                            <asp:FileUpload ID="fuProductImage" runat="server"
-                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                onchange="previewImage(this);"
-                                CssClass="mt-1.5 block w-full cursor-pointer text-[13px] text-ink-600
-                                    file:mr-3 file:py-2 file:px-4
-                                    file:rounded-base file:border-0
-                                    file:text-[13px] file:font-bold
-                                    file:bg-brand-50 file:text-brand-700
-                                    hover:file:bg-brand-100
-                                    file:cursor-pointer" />
-                            <p class="mt-1 text-[11px] text-ink-400">
-                                فرمت‌های مجاز: JPG، PNG، GIF، WebP — حداکثر ۳ مگابایت
-                            </p>
-                            <p class="mt-0.5 text-[11px] text-ink-400">
-                                عکس به‌صورت خودکار به ابعاد ۶۰۰×۶۰۰ تغییر می‌یابد.
-                            </p>
-                        </div>
+                                    <asp:PlaceHolder ID="phPrimary" runat="server"
+                                        Visible='<%# Convert.ToBoolean(Eval("IsPrimary")) %>'>
+                                        <span class="absolute top-1 right-1 rounded bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
+                                            اصلی
+                                        </span>
+                                    </asp:PlaceHolder>
 
-                        <label class="flex items-start gap-2 rounded-base border border-danger-100 bg-danger-50/40 p-3 cursor-pointer">
-                            <asp:CheckBox ID="chkRemoveImage" runat="server"
-                                CssClass="mt-0.5 h-4 w-4 rounded border-ink-300 text-danger-600 focus:ring-danger-500" />
-                            <div>
-                                <p class="text-[12.5px] font-bold text-danger-700">حذف تصویر فعلی</p>
-                                <p class="mt-0.5 text-[11px] text-danger-600">
-                                    با تیک زدن این گزینه، تصویر فعلی حذف می‌شود.
-                                </p>
-                            </div>
-                        </label>
-
-                        <div class="rounded-base border border-brand-100 bg-brand-50/50 p-3">
-                            <p class="text-[11.5px] leading-relaxed text-ink-600">
-                                <i class="inline h-3.5 w-3.5 align-middle ml-1 text-brand-600" data-lucide="info"></i>
-                                تصاویر در پوشه <span class="font-mono text-ink-800">/Images/Products/</span>
-                                ذخیره می‌شوند و در کاتالوگ فروش و سایت اصلی قابل استفاده هستند.
-                            </p>
-                        </div>
-
+                                    <asp:LinkButton ID="btnDeleteImage" runat="server"
+                                        CommandName="DeleteImage"
+                                        CommandArgument='<%# Eval("ImageId") %>'
+                                        OnClientClick="return confirm('این تصویر حذف شود؟');"
+                                        CssClass="absolute -top-2 -left-2 grid h-6 w-6 place-items-center rounded-full bg-danger-500 text-white shadow opacity-0 transition group-hover:opacity-100"
+                                        ToolTip="حذف تصویر">
+                                        <i class="h-3.5 w-3.5" data-lucide="x"></i>
+                                    </asp:LinkButton>
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
                     </div>
+                </asp:Panel>
+
+                <!-- ─── آپلود تصاویر جدید ─── -->
+                <div>
+                    <span class="text-[13px] font-semibold text-ink-700">
+                        افزودن تصویر
+                    </span>
+                    <asp:FileUpload ID="fuProductImages" runat="server"
+                        AllowMultiple="true"
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                        onchange="previewMultiImages(this);"
+                        CssClass="mt-1.5 block w-full cursor-pointer text-[13px] text-ink-600
+                            file:mr-3 file:py-2 file:px-4
+                            file:rounded-base file:border-0
+                            file:text-[13px] file:font-bold
+                            file:bg-brand-50 file:text-brand-700
+                            hover:file:bg-brand-100
+                            file:cursor-pointer" />
+                    <p class="mt-1 text-[11px] text-ink-400">
+                        می‌توانید چند فایل را همزمان انتخاب کنید (Ctrl یا Shift).
+                        فرمت‌های مجاز: JPG، PNG، GIF، WebP — حداکثر ۳ مگابایت هر فایل.
+                    </p>
+                    <p class="mt-0.5 text-[11px] text-ink-400">
+                        عکس‌ها به‌صورت خودکار به ابعاد ۶۰۰×۶۰۰ تغییر می‌یابند.
+                        تصویر اول به عنوان <strong>عکس اصلی</strong> ثبت می‌شود.
+                    </p>
+                </div>
+
+                <!-- ─── پیش‌نمایش عکس‌های جدید ─── -->
+                <div id="multiPreview" class="mt-4 flex flex-wrap gap-3"></div>
+
+                <div class="mt-4 rounded-base border border-brand-100 bg-brand-50/50 p-3">
+                    <p class="text-[11.5px] leading-relaxed text-ink-600">
+                        <i class="inline h-3.5 w-3.5 align-middle ml-1 text-brand-600" data-lucide="info"></i>
+                        تصاویر در پوشه <span class="font-mono text-ink-800">/Images/Products/</span> ذخیره می‌شوند.
+                        برای محصولات نهایی (FG) می‌توانید چند زاویه/بسته‌بندی مختلف آپلود کنید.
+                    </p>
                 </div>
             </div>
 
@@ -460,7 +474,6 @@
                                 <tr class="border-b border-surface-line hover:bg-surface-body/70 transition">
                                     <td class="py-4 pr-4">
                                         <div class="flex items-center gap-3">
-                                            <!-- آواتار محصول: عکس یا آیکون -->
                                             <asp:PlaceHolder ID="phAvatarImage" runat="server"
                                                 Visible='<%# HasProductImage(Eval("ImageUrl")) %>'>
                                                 <img src='<%# ImageHelper.GetProductImageUrl(Convert.ToString(Eval("ImageUrl")), Request.ApplicationPath) %>'
@@ -634,13 +647,11 @@
     function applyProductTypeUI() {
         var type = getSelectedProductType();
 
-        // فیلد وزن
         var weightField = document.getElementById('weightField');
         if (weightField) {
             weightField.style.display = (type === '2') ? '' : 'none';
         }
 
-        // برجسته‌سازی کارت
         var cards = document.querySelectorAll('.product-type-card');
         for (var i = 0; i < cards.length; i++) {
             var cardType = cards[i].getAttribute('data-type');
@@ -651,7 +662,6 @@
             }
         }
 
-        // راهنما
         var hint = document.getElementById('typeHintText');
         if (hint) {
             if (type === '1') {
@@ -677,21 +687,36 @@
     }
 
     // ═══════════════════════════════════════════════
-    // پیش‌نمایش عکس
+    // پیش‌نمایش چند عکس جدید
     // ═══════════════════════════════════════════════
-    function previewImage(input) {
-        var preview = document.getElementById('<%= imgProductPreview.ClientID %>');
-        if (!preview) return;
+    function previewMultiImages(input) {
+        var box = document.getElementById('multiPreview');
+        if (!box) return;
+        box.innerHTML = '';
 
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
+        if (!input.files || input.files.length === 0) return;
 
-            var chkRemove = document.getElementById('<%= chkRemoveImage.ClientID %>');
-            if (chkRemove) chkRemove.checked = false;
+        for (var i = 0; i < input.files.length; i++) {
+            (function (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var wrap = document.createElement('div');
+                    wrap.className = 'relative';
+
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'h-24 w-24 rounded-base border-2 border-dashed border-brand-300 object-cover bg-white';
+
+                    var tag = document.createElement('span');
+                    tag.className = 'absolute top-1 right-1 rounded bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow';
+                    tag.textContent = 'جدید';
+
+                    wrap.appendChild(img);
+                    wrap.appendChild(tag);
+                    box.appendChild(wrap);
+                };
+                reader.readAsDataURL(file);
+            })(input.files[i]);
         }
     }
 

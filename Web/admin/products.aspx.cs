@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -512,6 +513,20 @@ public partial class admin_products : System.Web.UI.Page
         else if (e.CommandName == "ToggleActive") ToggleActiveProduct(productId);
     }
 
+    // ─────────────────────────────────────────────────────
+    // ItemCommand — گالری تصاویر
+    // ─────────────────────────────────────────────────────
+    protected void rptProductImages_ItemCommand(object source, RepeaterCommandEventArgs e)
+    {
+        if (e.CommandName != "DeleteImage") return;
+
+        int imageId;
+        if (!int.TryParse(Convert.ToString(e.CommandArgument), out imageId) || imageId <= 0)
+            return;
+
+        DeleteProductImage(imageId);
+    }
+
     private void LoadProductForEdit(int productId)
     {
         try
@@ -585,31 +600,317 @@ public partial class admin_products : System.Web.UI.Page
                             ListItem activeItem = ddlIsActive.Items.FindByValue(isActive ? "1" : "0");
                             if (activeItem != null) activeItem.Selected = true;
 
-                            // ✅ عکس فعلی
-                            string existingImage = dr["ImageUrl"] == DBNull.Value
-                                ? "" : Convert.ToString(dr["ImageUrl"]);
-                            hfExistingImageUrl.Value = existingImage;
-                            imgProductPreview.ImageUrl = ImageHelper.GetProductImageUrl(
-                                existingImage, Request.ApplicationPath);
-                            chkRemoveImage.Checked = false;
-
                             litFormTitle.Text = "ویرایش محصول — " + Convert.ToString(dr["ProductName"]);
-
-                            pnlForm.Visible = true;
-                            pnlList.Visible = false;
-                            pnlStats.Visible = false;
                         }
                         else
                         {
                             ShowMessage("محصول مورد نظر یافت نشد.");
+                            return;
                         }
                     }
                 }
+
+                // ✅ بارگذاری گالری تصاویر (بعد از بستن DataReader اصلی)
+                LoadProductImages(productId);
+
+                pnlForm.Visible = true;
+                pnlList.Visible = false;
+                pnlStats.Visible = false;
             }
         }
         catch (Exception ex)
         {
             ShowMessage("خطا در بارگذاری محصول: " + ex.Message);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // گالری تصاویر محصول
+    // ═══════════════════════════════════════════════════════
+    private void LoadProductImages(int productId)
+    {
+        try
+        {
+            using (SqlConnection conn = new SqlConnection(ConnStr))
+            {
+                conn.Open();
+
+                DataTable dt = new DataTable();
+                string sql =
+                    "SELECT ImageId, ImageUrl, IsPrimary, SortOrder " +
+                    "FROM ProductImages " +
+                    "WHERE ProductId = @Id AND IsDeleted = 0 " +
+                    "ORDER BY IsPrimary DESC, SortOrder ASC, ImageId ASC";
+
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", productId);
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        da.Fill(dt);
+                }
+
+                if (dt.Rows.Count > 0)
+                {
+                    pnlExistingImages.Visible = true;
+                    litImageCount.Text = dt.Rows.Count.ToString(CultureInfo.InvariantCulture);
+                    rptProductImages.DataSource = dt;
+                    rptProductImages.DataBind();
+                }
+                else
+                {
+                    pnlExistingImages.Visible = false;
+                    litImageCount.Text = "0";
+                    rptProductImages.DataSource = null;
+                    rptProductImages.DataBind();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowMessage("خطا در بارگذاری تصاویر: " + ex.Message);
+        }
+    }
+
+    private void SaveNewProductImages(SqlConnection conn, int productId, string productCode)
+    {
+        if (productId <= 0) return;
+        if (fuProductImages == null || fuProductImages.PostedFiles == null) return;
+        if (fuProductImages.PostedFiles.Count == 0) return;
+
+        // شماره ترتیب بعدی
+        int nextSort = 0;
+        using (SqlCommand cmd = new SqlCommand(
+            "SELECT ISNULL(MAX(SortOrder), -1) + 1 FROM ProductImages WHERE ProductId = @Id", conn))
+        {
+            cmd.Parameters.AddWithValue("@Id", productId);
+            object o = cmd.ExecuteScalar();
+            if (o != null && o != DBNull.Value) nextSort = Convert.ToInt32(o);
+        }
+
+        // آیا محصول از قبل عکس اصلی دارد؟
+        bool hasPrimary = false;
+        using (SqlCommand cmd = new SqlCommand(
+            "SELECT COUNT(*) FROM ProductImages WHERE ProductId = @Id AND IsPrimary = 1 AND IsDeleted = 0", conn))
+        {
+            cmd.Parameters.AddWithValue("@Id", productId);
+            hasPrimary = Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+        }
+
+        int savedIndex = 0;
+        foreach (HttpPostedFile posted in fuProductImages.PostedFiles)
+        {
+            if (posted == null || posted.ContentLength <= 0) continue;
+
+            string err;
+            string url = SavePostedImage(posted, productCode, out err);
+            if (!string.IsNullOrEmpty(err))
+            {
+                ShowMessage(err);
+                continue;
+            }
+            if (string.IsNullOrEmpty(url)) continue;
+
+            bool isPrimary = (!hasPrimary && savedIndex == 0);
+
+            using (SqlCommand cmd = new SqlCommand(
+                "INSERT INTO ProductImages (ProductId, ImageUrl, SortOrder, IsPrimary, CreatedAt, CreatedBy) " +
+                "VALUES (@Pid, @Url, @Sort, @Prim, GETDATE(), @By)", conn))
+            {
+                cmd.Parameters.AddWithValue("@Pid", productId);
+                cmd.Parameters.AddWithValue("@Url", url);
+                cmd.Parameters.AddWithValue("@Sort", nextSort + savedIndex);
+                cmd.Parameters.AddWithValue("@Prim", isPrimary);
+                cmd.Parameters.AddWithValue("@By",
+                    CurrentUserId > 0 ? (object)CurrentUserId : DBNull.Value);
+                cmd.ExecuteNonQuery();
+            }
+
+            // همگام‌سازی Products.ImageUrl با عکس اصلی
+            if (isPrimary)
+            {
+                using (SqlCommand cmd = new SqlCommand(
+                    "UPDATE Products SET ImageUrl = @Url WHERE ProductId = @Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Url", url);
+                    cmd.Parameters.AddWithValue("@Id", productId);
+                    cmd.ExecuteNonQuery();
+                }
+                hasPrimary = true;
+            }
+
+            savedIndex++;
+        }
+    }
+
+    private string SavePostedImage(HttpPostedFile posted, string productCode, out string error)
+    {
+        error = null;
+        try
+        {
+            if (posted == null || posted.ContentLength == 0)
+            {
+                error = "فایلی انتخاب نشده است.";
+                return null;
+            }
+
+            const int maxSize = 3 * 1024 * 1024;
+            if (posted.ContentLength > maxSize)
+            {
+                error = "حجم هر تصویر نمی‌تواند بیش از ۳ مگابایت باشد.";
+                return null;
+            }
+
+            string ext = Path.GetExtension(posted.FileName);
+            if (string.IsNullOrEmpty(ext)) ext = "";
+            ext = ext.ToLowerInvariant();
+
+            string[] allowed = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            bool ok = false;
+            for (int i = 0; i < allowed.Length; i++)
+                if (allowed[i] == ext) { ok = true; break; }
+
+            if (!ok)
+            {
+                error = "فرمت تصویر مجاز نیست. فقط JPG، PNG، GIF و WebP.";
+                return null;
+            }
+
+            string contentType = posted.ContentType != null
+                ? posted.ContentType.ToLowerInvariant() : "";
+            if (contentType.IndexOf("image/") != 0)
+            {
+                error = "فایل انتخاب‌شده یک تصویر معتبر نیست.";
+                return null;
+            }
+
+            string safeCode = MakeSafeFileName(productCode);
+            string uniqueName = safeCode
+                + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff")
+                + "_" + Guid.NewGuid().ToString("N").Substring(0, 6)
+                + ext;
+
+            string folderVirtual = "~/Images/Products/";
+            string folderPhysical = Server.MapPath(folderVirtual);
+            if (!Directory.Exists(folderPhysical))
+                Directory.CreateDirectory(folderPhysical);
+
+            string physicalPath = Path.Combine(folderPhysical, uniqueName);
+            posted.SaveAs(physicalPath);
+
+            return folderVirtual + uniqueName;
+        }
+        catch (Exception ex)
+        {
+            error = "خطا در ذخیره تصویر: " + ex.Message;
+            return null;
+        }
+    }
+
+    private string MakeSafeFileName(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return "img";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < input.Length; i++)
+        {
+            char c = input[i];
+            bool ok = (c >= 'a' && c <= 'z') ||
+                      (c >= 'A' && c <= 'Z') ||
+                      (c >= '0' && c <= '9') ||
+                      c == '-' || c == '_';
+            if (ok) sb.Append(c);
+        }
+        return sb.Length > 0 ? sb.ToString() : "img";
+    }
+
+    private void DeleteProductImage(int imageId)
+    {
+        try
+        {
+            int productId = 0;
+            bool wasPrimary = false;
+
+            using (SqlConnection conn = new SqlConnection(ConnStr))
+            {
+                conn.Open();
+
+                // خواندن اطلاعات عکس
+                using (SqlCommand get = new SqlCommand(
+                    "SELECT ProductId, IsPrimary FROM ProductImages " +
+                    "WHERE ImageId = @Id AND IsDeleted = 0", conn))
+                {
+                    get.Parameters.AddWithValue("@Id", imageId);
+                    using (SqlDataReader dr = get.ExecuteReader())
+                    {
+                        if (!dr.Read()) { ShowMessage("تصویر یافت نشد."); return; }
+                        productId = Convert.ToInt32(dr["ProductId"]);
+                        wasPrimary = dr["IsPrimary"] != DBNull.Value
+                            && Convert.ToBoolean(dr["IsPrimary"]);
+                    }
+                }
+
+                // حذف نرم
+                using (SqlCommand del = new SqlCommand(
+                    "UPDATE ProductImages SET IsDeleted = 1 WHERE ImageId = @Id", conn))
+                {
+                    del.Parameters.AddWithValue("@Id", imageId);
+                    del.ExecuteNonQuery();
+                }
+
+                // اگر عکس اصلی بود، جانشین انتخاب کن
+                if (wasPrimary)
+                {
+                    int newPrimaryId = 0;
+                    string newPrimaryUrl = null;
+
+                    using (SqlCommand next = new SqlCommand(
+                        "SELECT TOP 1 ImageId, ImageUrl FROM ProductImages " +
+                        "WHERE ProductId = @Pid AND IsDeleted = 0 " +
+                        "ORDER BY SortOrder ASC, ImageId ASC", conn))
+                    {
+                        next.Parameters.AddWithValue("@Pid", productId);
+                        using (SqlDataReader dr = next.ExecuteReader())
+                        {
+                            if (dr.Read())
+                            {
+                                newPrimaryId = Convert.ToInt32(dr["ImageId"]);
+                                newPrimaryUrl = Convert.ToString(dr["ImageUrl"]);
+                            }
+                        }
+                    }
+
+                    if (newPrimaryId > 0)
+                    {
+                        using (SqlCommand up = new SqlCommand(
+                            "UPDATE ProductImages SET IsPrimary = 1 WHERE ImageId = @Id", conn))
+                        {
+                            up.Parameters.AddWithValue("@Id", newPrimaryId);
+                            up.ExecuteNonQuery();
+                        }
+                    }
+
+                    // همگام‌سازی Products.ImageUrl
+                    using (SqlCommand sync = new SqlCommand(
+                        "UPDATE Products SET ImageUrl = @Url WHERE ProductId = @Id", conn))
+                    {
+                        sync.Parameters.AddWithValue("@Url",
+                            (object)newPrimaryUrl ?? DBNull.Value);
+                        sync.Parameters.AddWithValue("@Id", productId);
+                        sync.ExecuteNonQuery();
+                    }
+                }
+
+                WriteAudit(conn, "DeleteImage", productId,
+                    "Image #" + imageId.ToString(CultureInfo.InvariantCulture),
+                    "حذف تصویر محصول");
+            }
+
+            ShowMessage("تصویر با موفقیت حذف شد.");
+            if (EditProductId > 0) LoadProductImages(EditProductId);
+            LoadProducts();
+        }
+        catch (Exception ex)
+        {
+            ShowMessage("خطا در حذف تصویر: " + ex.Message);
         }
     }
 
@@ -742,34 +1043,6 @@ public partial class admin_products : System.Web.UI.Page
             return;
         }
 
-        // ═══════════════════════════════════════════════════════
-        // ✅ پردازش عکس
-        // ═══════════════════════════════════════════════════════
-        string finalImageUrl = hfExistingImageUrl.Value;
-        string oldImageUrl = hfExistingImageUrl.Value;
-
-        if (chkRemoveImage.Checked)
-        {
-            finalImageUrl = "";
-        }
-        else if (fuProductImage.HasFile)
-        {
-            string uploadError;
-            string newImageUrl = ImageHelper.SaveProductImage(
-                fuProductImage, Server, productCode, out uploadError);
-
-            if (!string.IsNullOrEmpty(uploadError))
-            {
-                ShowMessage(uploadError);
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(newImageUrl))
-            {
-                finalImageUrl = newImageUrl;
-            }
-        }
-
         try
         {
             using (SqlConnection conn = new SqlConnection(ConnStr))
@@ -793,6 +1066,8 @@ public partial class admin_products : System.Web.UI.Page
                     }
                 }
 
+                int savedProductId = 0;
+
                 if (currentId > 0)
                 {
                     // ── محافظت: تغییر نوع محصول ممنوع در صورت فعالیت ──
@@ -809,7 +1084,6 @@ public partial class admin_products : System.Web.UI.Page
                         "  ProductType = @Type, UnitId = @UnitId, WeightGram = @Weight, " +
                         "  Description = @Description, MinStock = @MinStock, MaxStock = @MaxStock, " +
                         "  ShelfLifeDays = @ShelfLife, RequiresBatch = @RequiresBatch, " +
-                        "  ImageUrl = @ImageUrl, " +
                         "  IsActive = @IsActive, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy " +
                         "WHERE ProductId = @Id";
 
@@ -831,8 +1105,6 @@ public partial class admin_products : System.Web.UI.Page
                         cmd.Parameters.AddWithValue("@ShelfLife",
                             shelfLifeDays.HasValue ? (object)shelfLifeDays.Value : DBNull.Value);
                         cmd.Parameters.AddWithValue("@RequiresBatch", requiresBatch);
-                        cmd.Parameters.AddWithValue("@ImageUrl",
-                            string.IsNullOrEmpty(finalImageUrl) ? (object)DBNull.Value : finalImageUrl);
                         cmd.Parameters.AddWithValue("@IsActive", isActive);
                         cmd.Parameters.AddWithValue("@UpdatedBy",
                             CurrentUserId > 0 ? (object)CurrentUserId : DBNull.Value);
@@ -840,14 +1112,9 @@ public partial class admin_products : System.Web.UI.Page
                         cmd.ExecuteNonQuery();
                     }
 
-                    // ✅ حذف عکس قدیمی اگر عوض شد
-                    if (oldImageUrl != finalImageUrl && !string.IsNullOrEmpty(oldImageUrl))
-                    {
-                        ImageHelper.DeleteProductImage(oldImageUrl, Server);
-                    }
+                    savedProductId = currentId;
 
                     WriteAudit(conn, "Update", currentId, productName, "ویرایش محصول");
-                    ShowMessage("تغییرات محصول با موفقیت ذخیره شد.");
                 }
                 else
                 {
@@ -855,10 +1122,10 @@ public partial class admin_products : System.Web.UI.Page
                         "INSERT INTO Products " +
                         "  (ProductCode, ProductName, CategoryId, ProductType, UnitId, " +
                         "   WeightGram, Description, MinStock, MaxStock, ShelfLifeDays, " +
-                        "   RequiresBatch, ImageUrl, IsActive, IsDeleted, CreatedAt, CreatedBy) " +
+                        "   RequiresBatch, IsActive, IsDeleted, CreatedAt, CreatedBy) " +
                         "VALUES (@Code, @Name, @CategoryId, @Type, @UnitId, " +
                         "   @Weight, @Description, @MinStock, @MaxStock, @ShelfLife, " +
-                        "   @RequiresBatch, @ImageUrl, @IsActive, 0, GETDATE(), @CreatedBy); " +
+                        "   @RequiresBatch, @IsActive, 0, GETDATE(), @CreatedBy); " +
                         "SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
                     int newId = 0;
@@ -880,8 +1147,6 @@ public partial class admin_products : System.Web.UI.Page
                         cmd.Parameters.AddWithValue("@ShelfLife",
                             shelfLifeDays.HasValue ? (object)shelfLifeDays.Value : DBNull.Value);
                         cmd.Parameters.AddWithValue("@RequiresBatch", requiresBatch);
-                        cmd.Parameters.AddWithValue("@ImageUrl",
-                            string.IsNullOrEmpty(finalImageUrl) ? (object)DBNull.Value : finalImageUrl);
                         cmd.Parameters.AddWithValue("@IsActive", isActive);
                         cmd.Parameters.AddWithValue("@CreatedBy",
                             CurrentUserId > 0 ? (object)CurrentUserId : DBNull.Value);
@@ -896,9 +1161,17 @@ public partial class admin_products : System.Web.UI.Page
                         WriteAudit(conn, "Insert", newId, productName, "ایجاد محصول جدید");
                     }
 
-                    ShowMessage("محصول جدید با موفقیت افزوده شد.");
+                    savedProductId = newId;
+                }
+
+                // ✅ ذخیره عکس‌های جدید (چندتایی)
+                if (savedProductId > 0)
+                {
+                    SaveNewProductImages(conn, savedProductId, productCode);
                 }
             }
+
+            ShowMessage("اطلاعات محصول با موفقیت ذخیره شد.");
 
             ClearForm();
             EditProductId = 0;
@@ -1442,10 +1715,14 @@ public partial class admin_products : System.Web.UI.Page
             if (activeItem != null) activeItem.Selected = true;
         }
 
-        // ✅ ریست عکس
-        hfExistingImageUrl.Value = "";
-        imgProductPreview.ImageUrl = "~/Images/Products/no-image.png";
-        chkRemoveImage.Checked = false;
+        // ✅ ریست گالری تصاویر
+        if (pnlExistingImages != null) pnlExistingImages.Visible = false;
+        if (rptProductImages != null)
+        {
+            rptProductImages.DataSource = null;
+            rptProductImages.DataBind();
+        }
+        if (litImageCount != null) litImageCount.Text = "0";
     }
 
     private void ShowMessage(string message)
