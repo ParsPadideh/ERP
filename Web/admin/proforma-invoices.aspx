@@ -704,6 +704,14 @@
                         CssClass="inline-flex h-10 items-center gap-2 rounded-base bg-amber-600 px-4 text-[13.5px] font-semibold text-white hover:bg-amber-700" />
                 </asp:PlaceHolder>
 
+                <!-- ✅ دکمه جدید: ثبت پرداخت (2 → 3) -->
+                <asp:PlaceHolder ID="phActionMarkPaid" runat="server" Visible="false">
+                    <asp:Button ID="btnMarkPaid" runat="server" Text="ثبت پرداخت"
+                        OnClick="btnMarkPaid_Click"
+                        OnClientClick="return confirm('پیش‌فاکتور به‌عنوان «پرداخت‌شده» علامت‌گذاری شود؟');"
+                        CssClass="inline-flex h-10 items-center gap-2 rounded-base bg-brand-600 px-4 text-[13.5px] font-semibold text-white hover:bg-brand-700" />
+                </asp:PlaceHolder>
+
                 <asp:PlaceHolder ID="phActionConvert" runat="server" Visible="false">
                     <asp:Button ID="btnConvert" runat="server" Text="تبدیل به فاکتور نهایی"
                         OnClick="btnConvert_Click"
@@ -778,7 +786,6 @@
                 }
             });
 
-            // وقتی کاربر مشتری را انتخاب می‌کند، PostBack
             $customer.on('select2:select', function (e) {
                 if (typeof __doPostBack === 'function') {
                     __doPostBack('<%= ddlCustomer.UniqueID %>', '');

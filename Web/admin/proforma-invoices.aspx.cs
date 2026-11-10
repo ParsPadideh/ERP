@@ -290,7 +290,6 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
                         string unit = dr["UnitName"] == DBNull.Value ? "" : Convert.ToString(dr["UnitName"]);
                         string category = dr["CategoryName"] == DBNull.Value ? "" : Convert.ToString(dr["CategoryName"]);
 
-                        // ═══ Label: کد — نام — دسته — واحد ═══
                         StringBuilder label = new StringBuilder();
                         label.Append(code);
                         label.Append(" — ");
@@ -582,8 +581,10 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
                 }
             }
 
+            // ── Reset all ──
             phActionSaveHeader.Visible = false;
             phActionIssue.Visible = false;
+            phActionMarkPaid.Visible = false;
             phActionConvert.Visible = false;
             phActionCancel.Visible = false;
             phActionPrint.Visible = false;
@@ -594,6 +595,7 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
 
             if (status == 1)
             {
+                // پیش‌نویس
                 phActionSaveHeader.Visible = true;
                 phActionIssue.Visible = true;
                 phActionCancel.Visible = true;
@@ -602,17 +604,21 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
             }
             else if (status == 2)
             {
+                // صادرشده — می‌تواند پرداخت شود، لغو شود، یا چاپ شود
+                phActionMarkPaid.Visible = true;
                 phActionCancel.Visible = true;
                 phActionPrint.Visible = true;
             }
             else if (status == 3)
             {
+                // پرداخت‌شده — قابل تبدیل به فاکتور نهایی
                 phActionConvert.Visible = true;
                 phActionCancel.Visible = true;
                 phActionPrint.Visible = true;
             }
             else if (status == 4)
             {
+                // تبدیل‌شده
                 phActionPrint.Visible = true;
                 if (finalInvoiceId > 0)
                 {
@@ -622,11 +628,11 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
             }
             else if (status == 5 || status == 6)
             {
+                // لغو‌شده / منقضی
                 phActionPrint.Visible = true;
                 phActionDelete.Visible = true;
             }
 
-            // Print link
             lnkPrint.NavigateUrl = "proforma-print.aspx?id=" + proformaId.ToString(CultureInfo.InvariantCulture);
         }
         catch { }
@@ -1137,7 +1143,6 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
                 || !int.TryParse(ddlItemProduct.SelectedValue, out productId) || productId <= 0)
                 return;
 
-            // ✅ مشتری را از Dropdown بخوان
             int customerId = 0;
             if (!string.IsNullOrEmpty(ddlCustomer.SelectedValue))
                 int.TryParse(ddlCustomer.SelectedValue, out customerId);
@@ -1191,7 +1196,6 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
 
                 int priceListId = customerPriceListId;
 
-                // لیست قیمت بر اساس نوع مشتری
                 if (priceListId <= 0)
                 {
                     using (SqlCommand cmd = new SqlCommand(
@@ -1206,7 +1210,6 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
                     }
                 }
 
-                // لیست پیش‌فرض
                 if (priceListId <= 0)
                 {
                     using (SqlCommand cmd = new SqlCommand(
@@ -1271,7 +1274,7 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
     // ═══════════════════════════════════════════════════════
     protected void btnAutoFillAllPrices_Click(object sender, EventArgs e)
     {
-        int updatedCount = 0;   // ✅ تعریف بیرون از using
+        int updatedCount = 0;
 
         try
         {
@@ -1808,6 +1811,62 @@ public partial class admin_proforma_invoices : System.Web.UI.Page
             }
         }
         catch { return "—"; }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // Mark as Paid  (Status 2 → 3)
+    // ═══════════════════════════════════════════════════════
+    protected void btnMarkPaid_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            int proformaId = CurrentProformaId;
+            if (proformaId <= 0) return;
+
+            using (SqlConnection conn = new SqlConnection(ConnStr))
+            {
+                conn.Open();
+
+                int status = 0;
+                string number = "";
+
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT ProformaNumber, Status FROM ProformaInvoices " +
+                    "WHERE ProformaInvoiceId = @Id AND IsDeleted = 0", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", proformaId);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.Read()) { ShowMessage("پیش‌فاکتور یافت نشد."); return; }
+                        number = Convert.ToString(dr["ProformaNumber"]);
+                        status = Convert.ToInt32(dr["Status"]);
+                    }
+                }
+
+                if (status != 2)
+                {
+                    ShowMessage("فقط پیش‌فاکتور «صادرشده» قابل علامت‌گذاری به‌عنوان پرداخت‌شده است.");
+                    return;
+                }
+
+                using (SqlCommand cmd = new SqlCommand(
+                    "UPDATE ProformaInvoices SET Status = 3, " +
+                    "  UpdatedAt = GETDATE(), UpdatedBy = @By " +
+                    "WHERE ProformaInvoiceId = @Id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@Id", proformaId);
+                    cmd.Parameters.AddWithValue("@By",
+                        CurrentUserId > 0 ? (object)CurrentUserId : DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
+
+                WriteAudit(conn, "MarkPaid", "ProformaInvoices", proformaId, number, "ثبت پرداخت");
+            }
+
+            ShowMessage("پیش‌فاکتور به «پرداخت‌شده» تغییر کرد. اکنون دکمه «تبدیل به فاکتور نهایی» فعال است.");
+            ShowDetailView(CurrentProformaId);
+        }
+        catch (Exception ex) { ShowMessage("خطا در ثبت پرداخت: " + ex.Message); }
     }
 
     // ═══════════════════════════════════════════════════════

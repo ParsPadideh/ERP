@@ -228,7 +228,7 @@ public partial class admin_service_orders : System.Web.UI.Page
                 conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "SELECT WarehouseId, WarehouseName FROM Warehouses " +
-                    "WHERE IsActive = 1 AND WarehouseType = 2 ORDER BY WarehouseName", conn))
+                    "WHERE IsActive = 1 AND WarehouseType = 1 ORDER BY WarehouseName", conn))
                 using (SqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
@@ -255,7 +255,7 @@ public partial class admin_service_orders : System.Web.UI.Page
                 conn.Open();
                 using (SqlCommand cmd = new SqlCommand(
                     "SELECT ProductId, ProductCode, ProductName FROM Products " +
-                    "WHERE IsActive = 1 AND IsDeleted = 0 AND ProductType = 2 " +
+                    "WHERE IsActive = 1 AND IsDeleted = 0 AND ProductType = 1 " +
                     "ORDER BY ProductName", conn))
                 using (SqlDataReader dr = cmd.ExecuteReader())
                 {

@@ -294,7 +294,7 @@ public partial class admin_boms : System.Web.UI.Page
                     "FROM Products p " +
                     "INNER JOIN Units u ON u.UnitId = p.UnitId " +
                     "WHERE p.IsActive = 1 AND p.IsDeleted = 0 AND u.IsDeleted = 0 " +
-                    "  AND p.ProductType = 1 " +
+                    "  AND p.ProductType = 1 OR  p.ProductType = 3" +
                     "ORDER BY p.ProductName", conn))
                 using (SqlDataReader dr = cmd.ExecuteReader())
                 {
